@@ -1,144 +1,249 @@
-import random
-from math import pi
 
-import flet
-from flet import Container, ElevatedButton, Page, Stack, colors
-
+import flet as ft
+from flet import (
+    ElevatedButton,
+    FilePicker,
+    FilePickerResultEvent,
+    Page,
+    Row,
+    Text,
+    icons,
+)
+import os
 
 def main(page: Page):
 
-    size = 40
-    gap = 6
-    duration = 2000
+    page.title = "Image Viewer"
+    page.theme_mode = ft.ThemeMode.DARK
+    page.padding = 50
+    page.update()
 
-    c1 = colors.PINK_500
-    c2 = colors.AMBER_500
-    c3 = colors.LIGHT_GREEN_500
-    c4 = colors.DEEP_PURPLE_500
+    # Open directory dialog
+    def get_directory_result(e: FilePickerResultEvent):
+        directory_path.value = e.path if e.path else "Cancelled!"
+        directory_path.update()
+  
+        images = [
+            #ft.Image(src=os.path.join(directory_path, image_file))
+            #for image_file in os.listdir(directory_path)
+            #if image_file.lower().endswith((".png", ".jpg", ".jpeg"))
+        ]
+        # Create a list to store the file names
+        #file_names = []
 
-    all_colors = [
-        colors.AMBER_400,
-        colors.AMBER_ACCENT_400,
-        colors.BLUE_400,
-        colors.BROWN_400,
-        colors.CYAN_700,
-        colors.DEEP_ORANGE_500,
-        colors.CYAN_500,
-        colors.INDIGO_600,
-        colors.ORANGE_ACCENT_100,
-        colors.PINK,
-        colors.RED_600,
-        colors.GREEN_400,
-        colors.GREEN_ACCENT_200,
-        colors.TEAL_ACCENT_200,
-        colors.LIGHT_BLUE_500,
-    ]
+        # Iterate over the selected files and add their names to the list
+        #for file in enumerate(selected_files):
+        #    file_names.append(file.name)
 
-    parts = [
-        # F
-        (0, 0, c1),
-        (0, 1, c1),
-        (0, 2, c1),
-        (0, 3, c1),
-        (0, 4, c1),
-        (1, 0, c1),
-        (1, 2, c1),
-        (2, 0, c1),
-        # L
-        (4, 0, c2),
-        (4, 1, c2),
-        (4, 2, c2),
-        (4, 3, c2),
-        (4, 4, c2),
-        (5, 4, c2),
-        (6, 4, c2),
-        # E
-        (8, 0, c3),
-        (9, 0, c3),
-        (10, 0, c3),
-        (8, 1, c3),
-        (8, 2, c3),
-        (9, 2, c3),
-        (10, 2, c3),
-        (8, 3, c3),
-        (8, 4, c3),
-        (9, 4, c3),
-        (10, 4, c3),
-        # T
-        (12, 0, c4),
-        (13, 0, c4),
-        (14, 0, c4),
-        (13, 1, c4),
-        (13, 2, c4),
-        (13, 3, c4),
-        (13, 4, c4),
-    ]
+        # Create a Text object to display the file names
+        #file_names_text = Text(value="\n".join(file_names))
 
-    width = 16 * (size + gap)
-    height = 5 * (size + gap)
+        # Add the Text object to the page
+        #page.add(file_names_text)
 
-    canvas = Stack(
-        width=width,
-        height=height,
-        animate_scale=duration,
-        animate_opacity=duration,
+    get_directory_dialog = FilePicker(on_result=get_directory_result)
+    directory_path = Text()
+    selected_files = Text()
+
+    '''
+    def display_images(folder_path):
+        images = [
+            ft.Image(src=os.path.join(folder_path, image_file))
+            for image_file in os.listdir(folder_path)
+            if image_file.lower().endswith((".png", ".jpg", ".jpeg"))
+        ]
+
+        def open_image(e, image):
+            def close_image(e):
+                page.controls.remove(image_view)
+                page.update()
+
+            image_view = ft.Image(
+                src=image.src,
+                width=page.width,
+                height=page.height,
+                on_click=close_image
+            )
+            page.controls.append(image_view)
+            page.update()
+
+            #page.controls.clear()
+            for i, image in enumerate(images):
+                image.on_click = lambda e, image=image: open_image(e, image)
+                page.controls.append(image)
+                if (i + 1) % 5 == 0:
+                    page.controls.append(ft.Divider())
+            page.update()
+        '''
+
+
+
+    # hide all dialogs in overlay
+    page.overlay.extend([get_directory_dialog])
+
+    page.add(
+           Row(
+            [
+                ElevatedButton(
+                    "Open directory",
+                    icon=icons.FOLDER_OPEN,
+                    on_click=lambda _: get_directory_dialog.get_directory_path(),
+                    disabled=page.web,
+                ),
+                directory_path,
+                selected_files,
+            ]
+        ),
+        Row(
+            [
+                Text(
+                    "Press ESC to exit full-screen image"
+                )
+            ]
+        ),
     )
 
-    # spread parts randomly
-    for i in range(len(parts)):
-        canvas.controls.append(
-            Container(
-                animate=duration,
-                animate_position=duration,
-                animate_rotation=duration,
+ft.app(target=main)
+
+
+
+'''
+
+import flet as ft
+import os
+
+def main(page: ft.Page):
+    page.title = "Image Viewer"
+
+    def open_folder(e):
+
+        file_picker = ft.FilePicker()
+        folder_path = file_picker.get_directory_path()
+        if folder_path:
+            display_images(folder_path)
+
+    def display_images(folder_path):
+        images = [
+            ft.Image(src=os.path.join(folder_path, image_file))
+            for image_file in os.listdir(folder_path)
+            if image_file.lower().endswith((".png", ".jpg", ".jpeg"))
+        ]
+
+        def open_image(e, image):
+            def close_image(e):
+                page.controls.remove(image_view)
+                page.update()
+
+            image_view = ft.Image(
+                src=image.src,
+                width=page.width,
+                height=page.height,
+                on_click=close_image
             )
+            page.controls.append(image_view)
+            page.update()
+
+        page.controls.clear()
+        for i, image in enumerate(images):
+            image.on_click = lambda e, image=image: open_image(e, image)
+            page.controls.append(image)
+            if (i + 1) % 5 == 0:
+                page.controls.append(ft.Divider())
+        page.update()
+
+    
+    page.add(
+        ft.ElevatedButton("Select Folder", on_click=open_folder),
+        ft.Row([ft.Text("Press ESC to exit full-screen image")]),
+    )
+
+ft.app(target=main, upload_dir="uploads")
+
+'''
+
+'''
+# FUNCIONANDO
+
+import flet
+from flet import (
+    ElevatedButton,
+    FilePicker,
+    FilePickerResultEvent,
+    Page,
+    Row,
+    Text,
+    icons,
+)
+
+
+def main(page: Page):
+    # Pick files dialog
+    def pick_files_result(e: FilePickerResultEvent):
+        selected_files.value = (
+            ", ".join(map(lambda f: f.name, e.files)) if e.files else "Cancelled!"
         )
+        selected_files.update()
 
-    def randomize(e):
-        random.seed()
-        for i in range(len(parts)):
-            c = canvas.controls[i]
-            part_size = random.randrange(int(size / 2), int(size * 3))
-            c.left = random.randrange(0, width)
-            c.top = random.randrange(0, height)
-            c.bgcolor = all_colors[random.randrange(0, len(all_colors))]
-            c.width = part_size
-            c.height = part_size
-            c.border_radius = random.randrange(0, int(size / 2))
-            c.rotate = random.randrange(0, 90) * 2 * pi / 360
-        canvas.scale = 5
-        canvas.opacity = 0.3
-        go_button.visible = True
-        again_button.visible = False
-        page.update()
+    pick_files_dialog = FilePicker(on_result=pick_files_result)
+    selected_files = Text()
 
-    def assemble(e):
-        i = 0
-        for left, top, bgcolor in parts:
-            c = canvas.controls[i]
-            c.left = left * (size + gap)
-            c.top = top * (size + gap)
-            c.bgcolor = bgcolor
-            c.width = size
-            c.height = size
-            c.border_radius = 5
-            c.rotate = 0
-            i += 1
-        canvas.scale = 1
-        canvas.opacity = 1
-        go_button.visible = False
-        again_button.visible = True
-        page.update()
+    # Save file dialog
+    def save_file_result(e: FilePickerResultEvent):
+        save_file_path.value = e.path if e.path else "Cancelled!"
+        save_file_path.update()
 
-    go_button = ElevatedButton("Go!", on_click=assemble)
-    again_button = ElevatedButton("Again!", on_click=randomize)
+    save_file_dialog = FilePicker(on_result=save_file_result)
+    save_file_path = Text()
 
-    randomize(None)
+    # Open directory dialog
+    def get_directory_result(e: FilePickerResultEvent):
+        directory_path.value = e.path if e.path else "Cancelled!"
+        directory_path.update()
 
-    page.horizontal_alignment = "center"
-    page.vertical_alignment = "center"
-    page.spacing = 30
-    page.add(canvas, go_button, again_button)
+    get_directory_dialog = FilePicker(on_result=get_directory_result)
+    directory_path = Text()
+
+    # hide all dialogs in overlay
+    page.overlay.extend([pick_files_dialog, save_file_dialog, get_directory_dialog])
+
+    page.add(
+        Row(
+            [
+                ElevatedButton(
+                    "Pick files",
+                    icon=icons.UPLOAD_FILE,
+                    on_click=lambda _: pick_files_dialog.pick_files(
+                        allow_multiple=True
+                    ),
+                ),
+                selected_files,
+            ]
+        ),
+        Row(
+            [
+                ElevatedButton(
+                    "Save file",
+                    icon=icons.SAVE,
+                    on_click=lambda _: save_file_dialog.save_file(),
+                    disabled=page.web,
+                ),
+                save_file_path,
+            ]
+        ),
+        Row(
+            [
+                ElevatedButton(
+                    "Open directory",
+                    icon=icons.FOLDER_OPEN,
+                    on_click=lambda _: get_directory_dialog.get_directory_path(),
+                    disabled=page.web,
+                ),
+                directory_path,
+            ]
+        ),
+    )
 
 
-flet.app(main)
+flet.app(target=main)
+
+'''
