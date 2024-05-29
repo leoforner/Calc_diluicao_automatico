@@ -2,6 +2,7 @@ import flet as ft
 from flet import (
     FilePicker,
     FilePickerResultEvent,
+    icons
 )
 from pathlib import Path
 
@@ -12,23 +13,23 @@ def main(page: ft.Page):
 
     # Open directory dialog
     def get_directory_result(e: FilePickerResultEvent):
-        directory_path.value = e.path if e.path else "Cancelled!"
-    
-        pasta_inicial = directory_path.value
+        directory_path.value = e.path if e.path else "Cancelled!"     
+        exibir_imagens( directory_path.value)
+        directory_path.update()
 
     
 
 
     def exibir_imagens(pasta):
         imagens.controls.clear()
-        for arquivo in pasta.iterdir():
+        for arquivo in Path(pasta).iterdir():
             if arquivo.is_file() and arquivo.suffix.lower() in (".jpg", ".jpeg", ".png", ".gif"):
                 imagens.controls.append(
                     ft.Image(
-                        src=arquivo,
+                        src=str(arquivo),  # Caminho do arquivo,
                         width=300,  # Largura da imagem
                         height=200, # Altura da imagem
-                        fit="ImageFit",  # Ajuste da imagem
+                        fit=ft.ImageFit.FILL,  # Ajuste da imagem
                         border_radius=5,
                     )
                 )
@@ -36,9 +37,10 @@ def main(page: ft.Page):
 
 
         # Pasta inicial (pode ser ajustada)
-    pasta_inicial = Path.home() / "Imagens"
+    pasta_inicial = Path.home() / "OneDrive - UFSC/Imagens/Capturas de tela"
 
-    imagens = ft.Column(scroll="ScrollMode")
+    
+    imagens = ft.Column( scroll=ft.ScrollMode.ALWAYS, expand=True)
     pasta_selecionada = ft.Text(f"Pasta selecionada: {pasta_inicial}")
     get_directory_dialog = FilePicker(on_result=get_directory_result)
     directory_path = ft.Text()
@@ -51,12 +53,13 @@ def main(page: ft.Page):
     page.add(
         pasta_selecionada,
         directory_path,
-        ft.ElevatedButton("Selecionar Pasta", on_click=get_directory_dialog.get_directory_path()),
-        
+        ft.ElevatedButton(
+            "Selecionar Pasta",
+            icon=icons.FOLDER_OPEN,
+            on_click=lambda _: get_directory_dialog.get_directory_path(),
+            disabled=page.web,
+        ),
         imagens,
     )
-
-    # Exibir imagens da pasta inicial ao iniciar
-    exibir_imagens(pasta_inicial)
 
 ft.app(target=main)
