@@ -1,111 +1,83 @@
-
 import flet as ft
 from flet import (
-    ElevatedButton,
+    Row,
+    Column,
     FilePicker,
     FilePickerResultEvent,
-    Page,
-    Row,
-    Text,
-    icons,
+    icons
 )
-import os
+from pathlib import Path
 
-def main(page: Page):
+def main(page: ft.Page):
+    page.title = "Análize de Imagens"
 
-    page.title = "Image Viewer"
-    page.theme_mode = ft.ThemeMode.DARK
-    page.padding = 50
-    page.update()
 
     # Open directory dialog
     def get_directory_result(e: FilePickerResultEvent):
-        directory_path.value = e.path if e.path else "Cancelled!"
+        directory_path.value = e.path if e.path else "Cancelled!"    
+
+        for arquivo in Path(directory_path.value).iterdir():
+            if arquivo.is_file() and arquivo.suffix.lower() in (".jpg", ".jpeg", ".png", ".gif", 'tiff'):
+                fotos_path.append(arquivo)
+
+
+        #exibir_imagens( directory_path.value)
         directory_path.update()
-  
-        images = [
-            #ft.Image(src=os.path.join(directory_path, image_file))
-            #for image_file in os.listdir(directory_path)
-            #if image_file.lower().endswith((".png", ".jpg", ".jpeg"))
-        ]
-        # Create a list to store the file names
-        #file_names = []
 
-        # Iterate over the selected files and add their names to the list
-        #for file in enumerate(selected_files):
-        #    file_names.append(file.name)
-
-        # Create a Text object to display the file names
-        #file_names_text = Text(value="\n".join(file_names))
-
-        # Add the Text object to the page
-        #page.add(file_names_text)
-
-    get_directory_dialog = FilePicker(on_result=get_directory_result)
-    directory_path = Text()
-    selected_files = Text()
-
-    '''
-        def display_images(folder_path):
-            images = [
-                ft.Image(src=os.path.join(folder_path, image_file))
-                for image_file in os.listdir(folder_path)
-                if image_file.lower().endswith((".png", ".jpg", ".jpeg"))
-            ]
-
-            def open_image(e, image):
-                def close_image(e):
-                    page.controls.remove(image_view)
-                    page.update()
-
-                image_view = ft.Image(
-                    src=image.src,
-                    width=page.width,
-                    height=page.height,
-                    on_click=close_image
+    
+    def exibir_imagens(versoes):
+        
+        imagens.controls.clear()
+        for imagem in versoes: 
+            imagens.controls.append(
+                ft.Image(
+                    src=imagem,  # Caminho do arquivo,
+                    width=300,  # Largura da imagem
+                    height=300, # Altura da imagem
+                    fit=ft.ImageFit.FILL,  # Ajuste da imagem
+                    border_radius=5,
                 )
-                page.controls.append(image_view)
-                page.update()
+                )
+        page.update()
 
-                #page.controls.clear()
-                for i, image in enumerate(images):
-                    image.on_click = lambda e, image=image: open_image(e, image)
-                    page.controls.append(image)
-                    if (i + 1) % 5 == 0:
-                        page.controls.append(ft.Divider())
-                page.update()
-        '''
 
+
+    # a função escolha_pb() receberá uma imagem  e a partir dela criará 5 versóes da foto e as exibirá
+    
+    
+    imagens = ft.Column( scroll=ft.ScrollMode.ALWAYS, expand=True)
+    get_directory_dialog = FilePicker(on_result=get_directory_result)
+    directory_path = ft.Text()
+    fotos_path = []
 
 
     # hide all dialogs in overlay
     page.overlay.extend([get_directory_dialog])
 
+    #Fotos_pb = escolha_pb()
+    
+
+
     page.add(
-           Row(
-            [
-                ElevatedButton(
-                    "Open directory",
-                    icon=icons.FOLDER_OPEN,
-                    on_click=lambda _: get_directory_dialog.get_directory_path(),
-                    disabled=page.web,
-                ),
-                directory_path,
-                selected_files,
-            ]
-        ),
         Row(
-            [
-                Text(
-                    "Press ESC to exit full-screen image"
-                )
-            ]
+        [
+            ft.ElevatedButton(
+                "Selecionar Pasta",
+                icon=icons.FOLDER_OPEN,
+                on_click=lambda _: get_directory_dialog.get_directory_path(),
+                disabled=page.web,
+            ),
+            directory_path,
+            imagens,
+            #Fotos_pb,
+        ],D
+        spacing=30,
+        alignment=ft.MainAxisAlignment.START,
         ),
-        Row(
-            [
-                
-            ]
-        ),
+       
+     imagens,
+        
     )
 
 ft.app(target=main)
+

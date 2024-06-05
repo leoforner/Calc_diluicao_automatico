@@ -1,5 +1,6 @@
 import flet as ft
 from flet import (
+    Row,
     FilePicker,
     FilePickerResultEvent,
     icons
@@ -51,15 +52,32 @@ def main(page: ft.Page):
 
 
     page.add(
-        pasta_selecionada,
-        directory_path,
-        ft.ElevatedButton(
-            "Selecionar Pasta",
-            icon=icons.FOLDER_OPEN,
-            on_click=lambda _: get_directory_dialog.get_directory_path(),
-            disabled=page.web,
+        Row(
+        [
+            pasta_selecionada,
+            directory_path,
+            ft.ElevatedButton(
+                "Selecionar Pasta",
+                icon=icons.FOLDER_OPEN,
+                on_click=lambda _: get_directory_dialog.get_directory_path(),
+                disabled=page.web,
+            ),
+            imagens,
+        ]
         ),
-        imagens,
+        Row(
+        [
+            pasta_selecionada,
+            directory_path,
+            ft.ElevatedButton(
+                "Selecionar Pasta",
+                icon=icons.FOLDER_OPEN,
+                on_click=lambda _: get_directory_dialog.get_directory_path(),
+                disabled=page.web,
+            ),
+            imagens,
+        ]
+        ),
     )
 
 ft.app(target=main)
