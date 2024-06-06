@@ -10,43 +10,30 @@ def main(page: ft.Page):
                     alignment=ft.alignment.center,
                     width=50,
                     height=50,
-                    bgcolor=ft.colors.AMBER,
-                    border_radius=ft.border_radius.all(5),
+                    bgcolor=ft.colors.AMBER_500,
                 )
             )
         return items
 
-    def slider_change(e):
-        row.width = float(e.control.value)
-        row.update()
-
-    width_slider = ft.Slider(
-        min=0,
-        max=page.window_width,
-        divisions=20,
-        value=page.window_width,
-        label="{value}",
-        on_change=slider_change,
-    )
-
-    row = ft.Row(
-        wrap=True,
-        spacing=10,
-        run_spacing=10,
-        controls=items(30),
-        width=page.window_width,
-    )
+    def row_with_alignment(align: ft.MainAxisAlignment):
+        return ft.Row(
+            [
+                ft.Text(str(align), size=16),
+                ft.Container(
+                    content=ft.Row(items(10), alignment=align),
+                    bgcolor=ft.colors.AMBER_100,
+                ),
+            ]
+        )
 
     page.add(
-        ft.Column(
-            [
-                ft.Text(
-                    "Change the row width to see how child items wrap onto multiple rows:"
-                ),
-                width_slider,
-            ],
-        ),
-        row,
+        row_with_alignment(ft.MainAxisAlignment.START),
+        row_with_alignment(ft.MainAxisAlignment.CENTER),
+        row_with_alignment(ft.MainAxisAlignment.END),
+        row_with_alignment(ft.MainAxisAlignment.SPACE_BETWEEN),
+        row_with_alignment(ft.MainAxisAlignment.SPACE_AROUND),
+        row_with_alignment(ft.MainAxisAlignment.SPACE_EVENLY),
     )
+
 
 ft.app(target=main)
