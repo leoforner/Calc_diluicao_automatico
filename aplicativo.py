@@ -1,5 +1,6 @@
 from email.mime import image
 from math import e
+from typing import Container
 import flet as ft
 from flet import (
     Row,
@@ -9,6 +10,7 @@ from flet import (
     icons
 )
 from pathlib import Path
+
 
 
 
@@ -23,57 +25,80 @@ def main(page: ft.Page):
 
         for arquivo in Path(directory_path.value).iterdir():
             if arquivo.is_file() and arquivo.suffix.lower() in (".jpg", ".jpeg", ".png", ".gif", 'tiff'):
-                fotos_path.controls.append(ft.Text(value=str(arquivo)))
+                directory_path.data.append(ft.Text(value=str(arquivo)))
+                page.data += 1
+                
 
         no_click(0)            
         directory_path.update()
 
-    '''    
+      
     def exibir_imagens(versoes):
-        
-        imagens.controls.clear()
-        for imagem in versoes: 
-            ft.ElevatedButton(
-                icon=imagem,
-                on_click=lambda _: get_directory_dialog.get_directory_path(),
-                disabled=page.web,
+        imagem_botao = []
+        for i in range(1,enumerate(versoes) - 1):
+            imagem_botao.append( 
+                Column(
+                    [
+                        ft.ElevatedButton(
+                            f"{20*i}%",    
+                            on_click=lambda _: get_directory_dialog.get_directory_path(),
+                            disabled=page.web,
+                        ),
+                        
+                        ft.Image(
+                            src=imagem,  # Caminho do arquivo,
+                            width=300,  # Largura da imagem
+                            height=300, # Altura da imagem
+                            fit=ft.ImageFit.FILL,  # Ajuste da imagem
+                            border_radius=5,
+                        )
+                        
+                    ],
+                    alignment=ft.MainAxisAlignment.SPACE_EVENLY,
+                 )
             )
-            imagens.controls.append(
-                ft.Image(
-                    src=imagem,  # Caminho do arquivo,
-                    width=300,  # Largura da imagem
-                    height=300, # Altura da imagem
-                    fit=ft.ImageFit.FILL,  # Ajuste da imagem
-                    border_radius=5,
-                )
-                )
-        page.update()'''
+        
+        return imagem_botao
+    
+
+
+        
 
 
     def no_click(j):
 
         if  j == 0:
-            imagem_atual = 0
-        else:
-            imagem_atual = fotos_path.controls.
+            imagem_original.data = 0
+            
         #criar nova linha com o valor do caminho da imagem atual e com isso conseguir usar o index para achar a imagem anterior e posterior
         if j == -1:
-            imagem_atual -= 1
+            if imagem_original.data > 0:
+                page.data -= 1
+            else:
+                imagem_original.data = page.data - 1
+        
+            imagem_original.data = directory_path.data[]
         
         if j == 1:
-            imagem_atual += 1
+            if imagem_original.data < page.data - 1:
+                imagem_original.data = directory_path.data[imagem_original.data + 1]
+            else:
+                imagem_original.data = 0
+            
+
+        
 
 
         imagem_original.controls.append(
             ft.Image(
-                        src=str(fotos_path.controls[imagem_atual]),  # Caminho do arquivo,
+                        src=str(directory_path.data[imagem_atual]),  # Caminho do arquivo,
                         width=300,  # Largura da imagem
                         height=200, # Altura da imagem
                         fit=ft.ImageFit.FILL,  # Ajuste da imagem
                         border_radius=5,
                     )
             )
-        
+        imagem_original.update()
         page.update()
 
             
@@ -81,25 +106,23 @@ def main(page: ft.Page):
 
     #variáveis
    
-    fotos_path = Row( alignment=ft.MainAxisAlignment.SPACE_EVENLY,  )
    
 
 
     #itens 
     get_directory_dialog = FilePicker(on_result=get_directory_result)
-    directory_path = ft.Text()
+    directory_path = ft.Text(data = [])
 
     
 
-    imagem_original = Row( alignment=ft.MainAxisAlignment.SPACE_EVENLY,  )
-    imagens = Row( alignment=ft.MainAxisAlignment.SPACE_EVENLY,     ),
+    imagem_original = Row( alignment=ft.MainAxisAlignment.SPACE_EVENLY, data = 0 )
     imagens_pb = Row( alignment=ft.MainAxisAlignment.SPACE_EVENLY,  )
     imagens_blur = Row( alignment=ft.MainAxisAlignment.SPACE_EVENLY,  )
     imagens_hz = Row( alignment=ft.MainAxisAlignment.SPACE_EVENLY,  )
 
 
     #linhas 
-    linha1 = Row([
+    Seleção_pasta = Row([
         ft.Text(value="Escolha a pasta que deseja fazer a análize:"),
         ft.ElevatedButton(
                 "Selecionar Pasta",
@@ -113,14 +136,14 @@ def main(page: ft.Page):
     alignment=ft.MainAxisAlignment.SPACE_EVENLY,
     )
 
-    linha2 = Row([ 
-        ft.Text(value="Escolha a imagem com o melhor contraste:"),
-        ],
-        spacing=30,
-        alignment=ft.MainAxisAlignment.SPACE_EVENLY,
+    atual = Column([
+        Row([ 
+            ft.Text(value="Imagem Atual:"),
+            ],
+            spacing=30,
+            alignment=ft.MainAxisAlignment.SPACE_EVENLY,
         )
-    
-    linha3 =  Row( 
+        Row( 
         [
             ft.ElevatedButton(
                 "Imagem aterior",
@@ -140,64 +163,43 @@ def main(page: ft.Page):
         spacing=30,
         alignment=ft.MainAxisAlignment.SPACE_EVENLY,
         )
+    ])
     
-    linha4 = Row([ 
+    P_B = Column([ 
         ft.Text(value="Escolha a imagem com o melhor contraste:"),
-        ],
-        spacing=30,
-        alignment=ft.MainAxisAlignment.SPACE_EVENLY,
-        )
-    
-    linha5 = Row([
         imagens_pb,
-    ], 
-    spacing=30, 
-    alignment=ft.MainAxisAlignment.SPACE_EVENLY
-    )
+        ],
+        spacing=30,
+        alignment=ft.MainAxisAlignment.SPACE_EVENLY,
+        )
 
-    linha6 = Row([ 
+    blur = Column([ 
         ft.Text(value="Escolha a imagem com o melhro blur:"),
-        ],
-        spacing=30,
-        alignment=ft.MainAxisAlignment.SPACE_EVENLY,
-        )
-    
-    linha7 = Row([
         imagens_blur,
-    ], 
-    spacing=30, 
-    alignment=ft.MainAxisAlignment.SPACE_EVENLY
-    )
+        ],
+        spacing=30,
+        alignment=ft.MainAxisAlignment.SPACE_EVENLY,
+        )
+
     
-    linha8 = Row([ 
+    horizontal = Column([ 
         ft.Text(value="Escolha a imagem com a melhor linha horizontal:"),
+        imagens_hz,
         ],
         spacing=30,
         alignment=ft.MainAxisAlignment.SPACE_EVENLY,
         )
     
-    linha9 = Row([
-        imagens_hz
 
-    ], 
-    spacing=30, 
-    alignment=ft.MainAxisAlignment.SPACE_EVENLY
-    )
-
-    linha10 = Row([ 
+    final = Row([ 
         ft.Text(value="Essa é a imagem processada e esses são os valores encontrados:"),
+        
         ],
         spacing=30,
         alignment=ft.MainAxisAlignment.SPACE_EVENLY,
         )
     
-    linha11 = Row([
-        
-
-    ], 
-    spacing=30, 
-    alignment=ft.MainAxisAlignment.SPACE_EVENLY
-    )
+  
     
     
 
@@ -208,19 +210,16 @@ def main(page: ft.Page):
 
 
     page.add(
-    
-        linha1,
-        linha2,
-        linha3,
-        linha4,
-        linha5,
-        linha6,
-        linha7,
-        linha8,
-        linha9,
-        linha10,
-        linha11,
-        
+        Column(
+            [
+            Seleção_pasta,
+            atual,
+            P_B,
+            blur,
+            horizontal,
+            final,
+            ]
+        )
     )
 
 ft.app(target=main)
