@@ -66,48 +66,47 @@ def main(page: ft.Page):
 
 
     def no_click(j):
+        
+        #directory_path.data    lista 
+        #imagem_original.data   index da imagem atual
+
+        index = imagem_original.data
+        imagem = directory_path.data[index]
+
 
         if  j == 0:
-            imagem_original.data = 0
+            index = 0
             
-        #criar nova linha com o valor do caminho da imagem atual e com isso conseguir usar o index para achar a imagem anterior e posterior
+
         if j == -1:
-            if imagem_original.data > 0:
-                page.data -= 1
+            if index > 0:
+                index -= 1
             else:
-                imagem_original.data = page.data - 1
+                index = len(directory_path.data) - 1
         
-            imagem_original.data = directory_path.data[]
+          
         
         if j == 1:
-            if imagem_original.data < page.data - 1:
-                imagem_original.data = directory_path.data[imagem_original.data + 1]
+            if index < len(directory_path.data) - 1:
+                index = index + 1
             else:
-                imagem_original.data = 0
-            
+                index = 0
 
-        
+        imagem_original.data = index
 
 
-        imagem_original.controls.append(
-            ft.Image(
-                        src=str(directory_path.data[imagem_atual]),  # Caminho do arquivo,
+        imagem_original.controls[0] = ft.Image(
+                        src=str(directory_path.data[index]),  # Caminho do arquivo,
                         width=300,  # Largura da imagem
                         height=200, # Altura da imagem
                         fit=ft.ImageFit.FILL,  # Ajuste da imagem
                         border_radius=5,
                     )
-            )
+            
         imagem_original.update()
         page.update()
 
-            
-
-
-    #variáveis
-   
-   
-
+        
 
     #itens 
     get_directory_dialog = FilePicker(on_result=get_directory_result)
@@ -136,13 +135,14 @@ def main(page: ft.Page):
     alignment=ft.MainAxisAlignment.SPACE_EVENLY,
     )
 
-    atual = Column([
+    atual = Column(
+        [
         Row([ 
             ft.Text(value="Imagem Atual:"),
             ],
             spacing=30,
             alignment=ft.MainAxisAlignment.SPACE_EVENLY,
-        )
+        ),
         Row( 
         [
             ft.ElevatedButton(
