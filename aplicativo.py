@@ -1,8 +1,6 @@
-from email.mime import image
-from math import e
-from typing import Container
 import flet as ft
 from flet import (
+    Container,
     Row,
     Column,
     FilePicker,
@@ -10,7 +8,8 @@ from flet import (
     icons
 )
 from pathlib import Path
-
+import numpy as np
+import cv2
 
 
 
@@ -25,34 +24,30 @@ def main(page: ft.Page):
 
         for arquivo in Path(directory_path.value).iterdir():
             if arquivo.is_file() and arquivo.suffix.lower() in (".jpg", ".jpeg", ".png", ".gif", 'tiff'):
-                directory_path.data.append(ft.Text(value=str(arquivo)))
-                page.data += 1
+                new_path = str(arquivo).replace("\\", "/")
+                directory_path.data.append(str(new_path))
                 
 
-        no_click(0)            
+        proxima(e)
+        anterior(e)
         directory_path.update()
 
       
     def exibir_imagens(versoes):
         imagem_botao = []
-        for i in range(1,enumerate(versoes) - 1):
+        for i in range(1,len(versoes) ):
+
             imagem_botao.append( 
-                Column(
+                Row(
                     [
-                        ft.ElevatedButton(
-                            f"{20*i}%",    
-                            on_click=lambda _: get_directory_dialog.get_directory_path(),
-                            disabled=page.web,
+                        Container(
+                            image_src=versoes[i-1],
+                            width=150,
+                            height=150,
+                            image_fit=ft.ImageFit.FILL,
+                            #onclick = ,
                         ),
-                        
-                        ft.Image(
-                            src=imagem,  # Caminho do arquivo,
-                            width=300,  # Largura da imagem
-                            height=300, # Altura da imagem
-                            fit=ft.ImageFit.FILL,  # Ajuste da imagem
-                            border_radius=5,
-                        )
-                        
+                        ft.Text( f"{20*i}%"),
                     ],
                     alignment=ft.MainAxisAlignment.SPACE_EVENLY,
                  )
@@ -60,53 +55,44 @@ def main(page: ft.Page):
         
         return imagem_botao
     
-
-
-        
-
-
-    def no_click(j):
-        
+       
         #directory_path.data    lista 
         #imagem_original.data   index da imagem atual
 
-        index = imagem_original.data
-        imagem = directory_path.data[index]
+    def proxima(e):
+        if imagem_original.data == len(directory_path.data) - 1:
+            imagem_original.data = 0
+        else:
+            imagem_original.data += 1
+        print("pro")
+        print(directory_path.data)
+        print(imagem_original.data)
+        print(directory_path.data[imagem_original.data])
 
-
-        if  j == 0:
-            index = 0
-            
-
-        if j == -1:
-            if index > 0:
-                index -= 1
-            else:
-                index = len(directory_path.data) - 1
-        
-          
-        
-        if j == 1:
-            if index < len(directory_path.data) - 1:
-                index = index + 1
-            else:
-                index = 0
-
-        imagem_original.data = index
-
-
-        imagem_original.controls[0] = ft.Image(
-                        src=str(directory_path.data[index]),  # Caminho do arquivo,
-                        width=300,  # Largura da imagem
-                        height=200, # Altura da imagem
-                        fit=ft.ImageFit.FILL,  # Ajuste da imagem
-                        border_radius=5,
-                    )
+        imagem_original.image_src = directory_path.data[imagem_original.data]
             
         imagem_original.update()
+        atual.update()
+        page.update()       
+    
+
+
+
+    def anterior(e):
+        if imagem_original.data == 0:
+            imagem_original.data = len(directory_path.data) - 1
+        else:
+            imagem_original.data -= 1
+        print("ant")
+        print(directory_path.data)
+        print(imagem_original.data)
+        print(directory_path.data[imagem_original.data])
+        imagem_original.image_src = directory_path.data[imagem_original.data]
+            
+        imagem_original.update()
+        atual.update()
         page.update()
 
-        
 
     #itens 
     get_directory_dialog = FilePicker(on_result=get_directory_result)
@@ -114,7 +100,7 @@ def main(page: ft.Page):
 
     
 
-    imagem_original = Row( alignment=ft.MainAxisAlignment.SPACE_EVENLY, data = 0 )
+    imagem_original = Container( image_src='C:/Users/leona/OneDrive - UFSC/Imagens/robota/Caputinho.png', width=150, height=150, image_fit=ft.ImageFit.FILL, data = 0 )
     imagens_pb = Row( alignment=ft.MainAxisAlignment.SPACE_EVENLY,  )
     imagens_blur = Row( alignment=ft.MainAxisAlignment.SPACE_EVENLY,  )
     imagens_hz = Row( alignment=ft.MainAxisAlignment.SPACE_EVENLY,  )
@@ -147,15 +133,15 @@ def main(page: ft.Page):
         [
             ft.ElevatedButton(
                 "Imagem aterior",
-                icon=icons.ARROW_RIGHT_ALT_ROUNDED,
-                on_click=no_click(-1),
+                icon=icons.KEYBOARD_DOUBLE_ARROW_LEFT_ROUNDED,
+                on_click=anterior,
                 disabled=page.web,
             ),
             imagem_original,
             ft.ElevatedButton(
                 "proxima imagem",
-                icon=icons.ARROW_LEFT_ROUNDED,
-                on_click=no_click(1),
+                icon=icons.KEYBOARD_DOUBLE_ARROW_RIGHT_ROUNDED,
+                on_click=proxima,
                 disabled=page.web,
             ),
 
@@ -210,16 +196,14 @@ def main(page: ft.Page):
 
 
     page.add(
-        Column(
-            [
+
             Seleção_pasta,
             atual,
             P_B,
             blur,
             horizontal,
             final,
-            ]
-        )
+
     )
 
 ft.app(target=main)
