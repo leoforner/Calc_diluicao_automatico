@@ -8,8 +8,9 @@ from flet import (
     icons
 )
 from pathlib import Path
+import matplotlib.pyplot as plt
 import numpy as np
-import cv2
+import cv2 as cv
 
 
 
@@ -31,7 +32,6 @@ def main(page: ft.Page):
         proxima(e)
         anterior(e)
         directory_path.update()
-
       
     def exibir_imagens(versoes):
         imagem_botao = []
@@ -74,9 +74,6 @@ def main(page: ft.Page):
         imagem_original.update()
         atual.update()
         page.update()       
-    
-
-
 
     def anterior(e):
         if imagem_original.data == 0:
@@ -94,6 +91,34 @@ def main(page: ft.Page):
         page.update()
 
 
+    def processar_PB(imagem_original):
+        img = cv2.imread(imagem_original, cv2.IMREAD_GRAYSCALE)
+        return img
+
+    def processar_blur(imagem_original):
+        img = cv2.imread(imagem_original)
+        blur = cv2.GaussianBlur(img, (5, 5), 0)
+        return blur
+
+    def processar_horizontal(imagem_original):
+        img = cv2.imread(imagem_original)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+        lines = cv2.HoughLinesP(edges, 1, np.pi/180, 100, minLineLength=100, maxLineGap=10)
+        return lines
+
+    def processar_imagem(imagem_original):
+        img = cv2.imread(imagem_original)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+        lines = cv2.HoughLinesP(edges, 1, np.pi/180, 100, minLineLength=100, maxLineGap=10)
+        return lines
+    
+    
+
+
+
+
     #itens 
     get_directory_dialog = FilePicker(on_result=get_directory_result)
     directory_path = ft.Text(data = [])
@@ -101,8 +126,14 @@ def main(page: ft.Page):
     
 
     imagem_original = Container( image_src='C:/Users/leona/OneDrive - UFSC/Imagens/robota/Caputinho.png', width=150, height=150, image_fit=ft.ImageFit.FILL, data = 0 )
+    
+    
     imagens_pb = Row( alignment=ft.MainAxisAlignment.SPACE_EVENLY,  )
+    
+    
     imagens_blur = Row( alignment=ft.MainAxisAlignment.SPACE_EVENLY,  )
+    
+    
     imagens_hz = Row( alignment=ft.MainAxisAlignment.SPACE_EVENLY,  )
 
 
