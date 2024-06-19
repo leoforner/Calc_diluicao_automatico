@@ -92,8 +92,12 @@ def main(page: ft.Page):
 
 
     def processar_PB(imagem_original):
-        img = cv2.imread(imagem_original, cv2.IMREAD_GRAYSCALE)
-        return img
+        versoes_pb = []
+        image = cv.imread(imagem_original)
+        for i in range(0,5):
+            versoes_pb[i] = np.copy(image)
+        
+        return
 
     def processar_blur(imagem_original):
         img = cv2.imread(imagem_original)
