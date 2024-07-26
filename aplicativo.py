@@ -1,3 +1,4 @@
+from tkinter.tix import IMAGE
 import flet as ft
 from flet import (
     Container,
@@ -11,6 +12,18 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2 as cv
+from PIL import Image
+from io import BytesIO
+import base64
+
+
+# Função para converter matriz NumPy para imagem PNG em base64
+def numpy_to_base64(np_array):
+    image = Image.fromarray(np_array.astype('uint8'))
+    buffered = BytesIO()
+    image.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+    return img_str
 
 
 
@@ -24,7 +37,7 @@ def main(page: ft.Page):
         directory_path.value = e.path if e.path else "Cancelled!"    
 
         for arquivo in Path(directory_path.value).iterdir():
-            if arquivo.is_file() and arquivo.suffix.lower() in (".jpg", ".jpeg", ".png", ".gif", 'tiff'):
+            if arquivo.is_file() and arquivo.suffix.lower() in (".jpg", ".jpeg", ".png", ".gif", 'tif'):
                 new_path = str(arquivo).replace("\\", "/")
                 directory_path.data.append(str(new_path))
                 
@@ -32,6 +45,7 @@ def main(page: ft.Page):
         proxima(e)
         anterior(e)
         directory_path.update()
+        processar_blur()
       
     def exibir_imagens(versoes):
         imagem_botao = []
@@ -90,21 +104,80 @@ def main(page: ft.Page):
         atual.update()
         page.update()
 
+    def processar_blur():
+        image = Image.open(imagem_original.image_src).convert('RGB')
+        image = np.array(image)
+        pb_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+        itens = []
 
-    def processar_PB(imagem_original):
-        versoes_pb = []
-        image = cv.imread(imagem_original)
-        for i in range(0,5):
-            versoes_pb[i] = np.copy(image)
-        
-        return
+        for i in range(5):
 
-    def processar_blur(imagem_original):
-        img = cv2.imread(imagem_original)
-        blur = cv2.GaussianBlur(img, (5, 5), 0)
+            BLUR = cv.GaussianBlur(pb_image, (1 + i*20, 1 + i*20), 0)
+            imagens_blur.data[i] = BLUR
+            base64_image = numpy_to_base64(BLUR)
+
+            itens.append(
+                ft.Column([
+                        ft.Image(
+                        src_base64=base64_image,
+                            width=150,
+                            height=150,
+                        ),
+                        ft.ElevatedButton(
+                                f"Imagem {i}",
+                                on_click= lambda _: processar_PB(imagens_blur.data[i]),
+                                disabled=page.web,
+                        ),
+                    ]
+                )
+            )
+
+        imagens_blur.controls = itens
+        imagens_blur.update()
+        blur.update()
+        page.update()  
+        processar_PB(imagens_blur.data[0])   
         return blur
 
-    def processar_horizontal(imagem_original):
+    def processar_PB(ima):
+        itens = []
+        
+        for i in range(5):
+            #ret,thresh = cv.threshold(ima,(1 + (15*i)),255,0)
+            #imagens_pb.data[i] = thresh
+            #base64_image = numpy_to_base64(thresh)
+
+            BLUR = cv.GaussianBlur(ima, (1 + i*20, 1 + i*20), 0)
+            imagens_blur.data[i] = BLUR
+            base64_image = numpy_to_base64(BLUR)
+
+
+            itens.append(
+                ft.Column([
+                        ft.Image(
+                        src_base64=base64_image,
+                            width=150,
+                            height=150,
+                        ),
+                        ft.ElevatedButton(
+                                f"Imagem {i}",
+                                #on_click= lambda _: processar_horizontal(imagens_pb.data[i]),
+                                disabled=page.web,
+                        ),
+                    ]
+                )
+            )
+
+            
+        imagens_pb.controls = itens
+        #processar_horizontal(imagens_pb.data[0])
+        imagens_pb.update()
+        P_B.update()
+        page.update()   
+        return
+
+
+    def processar_horizontal():
         img = cv2.imread(imagem_original)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         edges = cv2.Canny(gray, 50, 150, apertureSize=3)
@@ -132,13 +205,13 @@ def main(page: ft.Page):
     imagem_original = Container( image_src='C:/Users/leona/OneDrive - UFSC/Imagens/robota/Caputinho.png', width=150, height=150, image_fit=ft.ImageFit.FILL, data = 0 )
     
     
-    imagens_pb = Row( alignment=ft.MainAxisAlignment.SPACE_EVENLY,  )
+    imagens_pb = Row( alignment=ft.MainAxisAlignment.SPACE_EVENLY, data = [0,0,0,0,0] )
     
     
-    imagens_blur = Row( alignment=ft.MainAxisAlignment.SPACE_EVENLY,  )
+    imagens_blur = Row( alignment=ft.MainAxisAlignment.SPACE_EVENLY, data = [0,0,0,0,0]  )
     
     
-    imagens_hz = Row( alignment=ft.MainAxisAlignment.SPACE_EVENLY,  )
+    imagens_hz = Row( alignment=ft.MainAxisAlignment.SPACE_EVENLY, data = [0,0,0,0,0]  )
 
 
     #linhas 
@@ -185,18 +258,18 @@ def main(page: ft.Page):
         alignment=ft.MainAxisAlignment.SPACE_EVENLY,
         )
     ])
-    
-    P_B = Column([ 
-        ft.Text(value="Escolha a imagem com o melhor contraste:"),
-        imagens_pb,
-        ],
-        spacing=30,
-        alignment=ft.MainAxisAlignment.SPACE_EVENLY,
-        )
 
     blur = Column([ 
         ft.Text(value="Escolha a imagem com o melhro blur:"),
         imagens_blur,
+        ],
+        spacing=30,
+        alignment=ft.MainAxisAlignment.SPACE_EVENLY,
+        )
+    
+    P_B = Column([ 
+        ft.Text(value="Escolha a imagem com o melhor contraste:"),
+        imagens_pb,
         ],
         spacing=30,
         alignment=ft.MainAxisAlignment.SPACE_EVENLY,
@@ -234,8 +307,8 @@ def main(page: ft.Page):
 
             Seleção_pasta,
             atual,
-            P_B,
             blur,
+            P_B,
             horizontal,
             final,
 
