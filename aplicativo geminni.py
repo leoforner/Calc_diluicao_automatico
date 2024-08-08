@@ -79,6 +79,7 @@ def main(page: ft.Page):
         page.update()
 
     def processar_blur():
+        imagens_blur.controls.clear()
         image = Image.open(imagem_original.image_src).convert('RGB')
         image = np.array(image)
         pb_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -95,15 +96,17 @@ def main(page: ft.Page):
                         src_base64=base64_image,
                         width=150,
                         height=150,
-                    ),
+                    ),#processar_PB(imagens_blur.data[data]),
                     ft.ElevatedButton(
-                        f"Imagem {i}",
-                        on_click=lambda e, data=i: processar_PB(imagens_blur.data[data]),
+                        text=f"Botão {i}",
+                        on_click=lambda e, data=i: print(f"Botão {data} clicado"),
                         disabled=page.web,
                     ),
                 ])
             )
 
+
+        print('blur ok')
         imagens_blur.controls = itens
         imagens_blur.update()
         blur.update()
@@ -112,7 +115,8 @@ def main(page: ft.Page):
         return blur
 
     def processar_PB(ima):
-        print(ima)
+        #print(ima)
+        imagens_pb.controls.clear()
         itens = []
 
         for i in range(5):
@@ -133,6 +137,8 @@ def main(page: ft.Page):
                     ),
                 ])
             )
+
+        print('pb ok')
         
         imagens_pb.controls = itens
         imagens_pb.update()
@@ -161,7 +167,7 @@ def main(page: ft.Page):
                     ),
                     ft.ElevatedButton(
                         f"Imagem {i}",
-                        on_click=lambda e, data=i: processar_PB(imagens_blur.data[data]),
+                        #on_click=lambda e, data=i: processar_PB(imagens_blur.data[data]),
                         disabled=page.web,
                     ),
                 ])
@@ -173,12 +179,12 @@ def main(page: ft.Page):
         page.update()
 
 
-        edges = cv2.Canny(gray, 50, 150, apertureSize=3)
-        lines = cv2.HoughLinesP(edges, 1, np.pi/180, 100, minLineLength=100, maxLineGap=10)
-        horizontal.controls = lines
+        #edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+        #lines = cv2.HoughLinesP(edges, 1, np.pi/180, 100, minLineLength=100, maxLineGap=10)
+        #horizontal.controls = lines
         horizontal.update()
         page.update()
-        return lines
+        return #lines
 
     def processar_imagem(imagem_original):
         img = cv2.imread(imagem_original)
