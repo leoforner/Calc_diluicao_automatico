@@ -18,6 +18,8 @@ def numpy_to_base64(np_array):
 
 def main(page: ft.Page):
     page.title = "Image Analysis"
+    page.scroll = True
+    is_web = False  # Variável booleana para desabilitar os botões
 
     # Data Storage
     directory_path = ft.Text(data=[])
@@ -27,6 +29,7 @@ def main(page: ft.Page):
     )
     imagens_pb = Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY, data=[0, 0, 0, 0, 0])
     imagens_blur = Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY, data=[0, 0, 0, 0, 0])
+    imagens_vales = Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY, data=[0, 0, 0, 0, 0])
     imagens_hz = Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY, data=[0, 0, 0, 0, 0])
     imagem_final = Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY, data=[0, 0, 0, 0, 0])
 
@@ -43,7 +46,6 @@ def main(page: ft.Page):
         anterior(e)
         directory_path.update()
         processar_blur()
-        processar_horizontal()
 
 
     def proxima(e):
@@ -60,7 +62,6 @@ def main(page: ft.Page):
         imagem_original.update()
         atual.update()
         processar_blur()
-        processar_horizontal()
         page.update()
 
     def anterior(e):
@@ -96,11 +97,11 @@ def main(page: ft.Page):
                         src_base64=base64_image,
                         width=150,
                         height=150,
-                    ),#processar_PB(imagens_blur.data[data]),
+                    ),
                     ft.ElevatedButton(
                         text=f"Botão {i}",
-                        on_click=lambda e, data=i: print(f"Botão {data} clicado"),
-                        disabled=page.web,
+                        on_click=lambda e, data=i: processar_PB(imagens_blur.data[data]), #print(f"Botão {data} clicado"),
+                        disabled=is_web,
                     ),
                 ])
             )
@@ -121,7 +122,7 @@ def main(page: ft.Page):
 
         for i in range(5):
             ret,thresh = cv2.threshold(ima,(1 + (15*i)),255,0)
-            imagens_blur.data[i] = thresh
+            imagens_pb.data[i] = thresh
             base64_image = numpy_to_base64(thresh)
 
             itens.append(
@@ -133,7 +134,8 @@ def main(page: ft.Page):
                     ),
                     ft.ElevatedButton(
                         f"Imagem {i}",
-                        disabled=page.web,
+                        on_click=lambda e, data=i: processar_vales(imagens_pb.data[data]), #print(f"Botão {data} clicado"),
+                        disabled=is_web,
                     ),
                 ])
             )
@@ -144,19 +146,21 @@ def main(page: ft.Page):
         imagens_pb.update()
         P_B.update()
         page.update()
+        processar_vales(imagens_pb.data[0])
         return
-
-    def processar_horizontal():
-
-        image = Image.open(imagem_original.image_src).convert('RGB')
-        image = np.array(image)
-        pb_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+   
+    def processar_vales(imagem):
+        imagens_vales.controls.clear()
         itens = []
 
         for i in range(5):
-            BLUR = cv2.GaussianBlur(pb_image, (1 + i*20, 1 + i*20), 0)
-            imagens_blur.data[i] = BLUR
-            base64_image = numpy_to_base64(BLUR)
+            
+            # Aplicar a detecção de bordas na imagem
+            bordas = cv2.Canny(imagem, i*10+30, i*10+130)
+
+ 
+            imagens_vales.data[i] = bordas
+            base64_image = numpy_to_base64(bordas)
 
             itens.append(
                 ft.Column([
@@ -167,31 +171,106 @@ def main(page: ft.Page):
                     ),
                     ft.ElevatedButton(
                         f"Imagem {i}",
-                        #on_click=lambda e, data=i: processar_PB(imagens_blur.data[data]),
-                        disabled=page.web,
+                        on_click=lambda e, data=i: processar_horizontal(imagens_vales.data[data]), #print(f"Botão {data} clicado"),
+                        disabled=is_web,
                     ),
                 ])
             )
 
-        imagens_blur.controls = itens
-        imagens_blur.update()
-        blur.update()
-        page.update()
 
-
-        #edges = cv2.Canny(gray, 50, 150, apertureSize=3)
-        #lines = cv2.HoughLinesP(edges, 1, np.pi/180, 100, minLineLength=100, maxLineGap=10)
-        #horizontal.controls = lines
+        print('vales ok')
+        
+        imagens_vales.controls = itens
+        imagens_vales.update()
         horizontal.update()
         page.update()
-        return #lines
+        processar_horizontal(imagens_vales.data[0])
+        
+        return 
 
-    def processar_imagem(imagem_original):
-        img = cv2.imread(imagem_original)
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        edges = cv2.Canny(gray, 50, 150, apertureSize=3)
-        lines = cv2.HoughLinesP(edges, 1, np.pi/180, 100, minLineLength=100, maxLineGap=10)
-        return lines
+    def processar_horizontal(bordas):
+        if imagem_original.image_src != None:
+            imagem = cv2.imread(imagem_original.image_src)
+        else:
+            imagem = cv2.imread("C:/Users/leona/OneDrive - UFSC/Imagens/robota/Caputinho.png")
+        imagens = []
+        imagens_hz.controls.clear()
+        itens = []
+
+        # Detectar as linhas na imagem
+        linhas = cv2.HoughLinesP(bordas, 1, np.pi/180, threshold=80, minLineLength=500, maxLineGap=1000)
+
+        # Ordenar as linhas pela sua comprimento
+        linhas_ordenadas = sorted(linhas, key=lambda linha: linha[0][2] - linha[0][0], reverse=True)
+
+        # Retornar as 'num_linhas' maiores linhas
+        L_O = linhas_ordenadas[:5]
+        print(len(linhas))
+        print(len(L_O))
+        
+        for i in range(len(L_O)):
+            
+            
+
+           
+            imagens.append(imagem.copy())
+
+            x1, y1, x2, y2 = L_O[i][0]
+            cv2.line(imagens[i], (x1, y1), (x2, y2), (255, 0, 0), 25)
+
+            imagens_hz.data[i] = imagens[i]
+            base64_image = numpy_to_base64(imagens[i])
+
+            itens.append(
+                ft.Column([
+                    ft.Image(
+                        src_base64=base64_image,
+                        width=150,
+                        height=150,
+                    ),
+                    ft.ElevatedButton(
+                        f"Imagem {i}",
+                        on_click=lambda e, data=i: processar_imagem_final(imagens_hz.data[data]), #print(f"Botão {data} clicado"),
+                        disabled=is_web,
+                    ),
+                ])
+            )
+
+        print('hz ok')
+
+        imagens_hz.controls = itens
+        imagens_hz.update()
+        horizontal.update()
+        final.update()
+        page.update()
+        processar_imagem_final(imagens_hz.data[0])
+        return #lines
+    
+    def processar_imagem_final(ima):
+        imagem_final.controls.clear()
+        itens = []
+
+        
+        base64_image = numpy_to_base64(ima)
+
+        itens.append(
+            ft.Column([
+                ft.Image(
+                    src_base64=base64_image,
+                    width=150,
+                    height=150,
+                ),
+            ])
+        )
+
+        print('final ok')
+        
+        imagem_final.controls = itens
+        imagem_final.update()
+        final.update()
+        page.update()
+        return
+
 
     # ... (UI elements and page setup, similar to the previous response)
     # UI Elements
@@ -203,7 +282,7 @@ def main(page: ft.Page):
             "Selecionar Pasta",
             icon=icons.FOLDER_OPEN,
             on_click=lambda _: get_directory_dialog.get_directory_path(),
-            disabled=page.web,
+            disabled=is_web,
         ),
         directory_path,
     ],
@@ -225,14 +304,14 @@ def main(page: ft.Page):
                 "Imagem aterior",
                 icon=icons.KEYBOARD_DOUBLE_ARROW_LEFT_ROUNDED,
                 on_click=anterior,
-                disabled=page.web,
+                disabled=is_web,
             ),
             imagem_original,
             ft.ElevatedButton(
                 "proxima imagem",
                 icon=icons.KEYBOARD_DOUBLE_ARROW_RIGHT_ROUNDED,
                 on_click=proxima,
-                disabled=page.web,
+                disabled=is_web,
             ),
 
         ],
@@ -258,6 +337,8 @@ def main(page: ft.Page):
     )
 
     horizontal = Column([
+        ft.Text(value="Escolha a imagem com a melhor linha borda:"),
+        imagens_vales,
         ft.Text(value="Escolha a imagem com a melhor linha horizontal:"),
         imagens_hz,
     ],
