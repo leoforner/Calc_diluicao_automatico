@@ -1,0 +1,16 @@
+import cv2
+
+# Load the image
+image = cv2.imread('F:/backup de arquivos/fotos/IC/Nova pasta/teste2.png')
+
+# Get the dimensions of the image
+height, width = image.shape[:2]
+
+# Calculate the number of pixels to crop from each side
+crop_pixels = int(min(height, width) * 0.05)
+
+# Crop the image
+cropped_image = image[crop_pixels:height-crop_pixels, crop_pixels:width-crop_pixels]
+
+# Save the cropped image
+cv2.imwrite('F:/backup de arquivos/fotos/IC/Nova pasta/teste222.png', cropped_image)
