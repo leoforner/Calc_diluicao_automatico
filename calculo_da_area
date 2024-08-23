@@ -1,28 +1,10 @@
 # Importing Required Modules 
 from rembg import remove 
-from Corte_da_imagem import corte
 import cv2
-
-# Store path of the image in the variable input_path 
-input_path = 'F:/backup de arquivos/fotos/IC/Nova pasta/teste3.png' 
-
-# Store path of the output image in the variable output_path 
-output_path = 'F:/backup de arquivos/fotos/IC/Nova pasta/teste3b2g.png' 
-
-
-input = cv2.imread(input_path)
-output = corte(input_path,0.2,0.2,0.2,0.2)#remove(input)
-cv2.imwrite(output_path, output) # type: ignore
-
-'''
-
 import numpy as np
 import math
 
 
-# input image
-path = output_path   
-# 1 EUR coin diameter in cm
 coinDiameter = 2.325
 # real area for the coin in cm^2
 coinArea = (coinDiameter/2)**2 * math.pi
@@ -184,5 +166,3 @@ print("Red Area in cm^2: ", pixelToArea(meatyPixelArea, coinPixelArea))
 print("Body-Fat Ratio: ", meatyPixelArea/slicePixelArea*100, "%")
 
 cv2.destroyAllWindows()
-
-'''

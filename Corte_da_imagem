@@ -1,0 +1,10 @@
+
+
+def corte(imagem,cima,baixo,esquerda,direita):
+    # obter dimensões da imagem
+    altura, largura = imagem.shape[:2]
+
+    # cortar a imagem
+    imagem_cortada = imagem[altura*cima:altura-(altura*baixo), largura*esquerda:largura-(largura*direita)]
+
+    return imagem_cortada
