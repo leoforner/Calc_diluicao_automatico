@@ -70,10 +70,16 @@ cv2.waitKey()
 
 # blurring
 imgBlur = cv2.GaussianBlur(img, (7, 7), 1)
+cv2.imshow("Starting image", imgBlur)
+cv2.waitKey()
 # graying
 imgGray = cv2.cvtColor(imgBlur, cv2.COLOR_BGR2GRAY)
+cv2.imshow("Starting image", imgGray)
+cv2.waitKey()
 # canny
 imgCanny = cv2.Canny(imgGray, 255, 195)
+cv2.imshow("Starting image", imgCanny)
+cv2.waitKey()
 
 kernel = np.ones((2, 2))
 imgDil = cv2.dilate(imgCanny, kernel, iterations = 3)

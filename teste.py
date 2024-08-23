@@ -11,15 +11,15 @@ output_path = 'F:/backup de arquivos/fotos/IC/Nova pasta/teste3b2g.png'
 
 input = cv2.imread(input_path)
 output = remove(input)
-cv2.imwrite(output_path, output)
+cv2.imwrite(output_path, output) # type: ignore
 
 
-import cv2
+
 import numpy as np
 import math
 
 # input image
-path = "F:/backup de arquivos/fotos/IC/imagens-20240604T172236Z-001/Nova pasta/1jHSf.jpg"
+path = output_path   
 # 1 EUR coin diameter in cm
 coinDiameter = 2.325
 # real area for the coin in cm^2
@@ -55,7 +55,8 @@ def getContours(img, imgContour):
         print("Detected Contour with Area: ", area)
 
         # minimum area value is to be fixed as the one that leaves the coin as the small object on the scene
-        if (area > 5000):
+        if (area > 400):
+            print("Area: ", area)
             perimeter = cv2.arcLength(cnt, True)
             
             # smaller epsilon -> more vertices detected [= more precision]
@@ -65,6 +66,7 @@ def getContours(img, imgContour):
             #print(len(approx))
             
             finalContours.append([len(approx), area, approx, cnt])
+
 
     # we want only two objects here: the coin and the meat slice
     print("---\nFinal number of External Contours: ", len(finalContours))
@@ -81,15 +83,46 @@ def getContours(img, imgContour):
     
 # sourcing the input image
 img = cv2.imread(path)
+
+# Definindo o tamanho da janela
+cv2.namedWindow("Starting image", cv2.WINDOW_NORMAL)
+cv2.resizeWindow("Starting image", 800, 600)  # Largura: 800, Altura: 600
 cv2.imshow("Starting image", img)
 cv2.waitKey()
 
+
+
+
+
 # blurring
 imgBlur = cv2.GaussianBlur(img, (7, 7), 1)
+cv2.namedWindow("blur image", cv2.WINDOW_NORMAL)
+cv2.resizeWindow("blur image", 800, 600)  # Largura: 800, Altura: 600
+cv2.imshow("blur image", imgBlur)
+cv2.waitKey()
+
 # graying
 imgGray = cv2.cvtColor(imgBlur, cv2.COLOR_BGR2GRAY)
+
+cv2.namedWindow("imgGray image", cv2.WINDOW_NORMAL)
+cv2.resizeWindow("imgGray image", 800, 600)  # Largura: 800, Altura: 600
+cv2.imshow("imgGray image", imgGray)
+
+
+mask = imgGray > 20
+imgGray[mask] = 255
+
+
+cv2.namedWindow("Starting image", cv2.WINDOW_NORMAL)
+cv2.resizeWindow("Starting image", 800, 600)  # Largura: 800, Altura: 600
+cv2.imshow("Starting image", imgGray)
+cv2.waitKey()
 # canny
-imgCanny = cv2.Canny(imgGray, 255, 195)
+imgCanny = cv2.Canny(imgGray, 255, 15)
+cv2.namedWindow("Starting image", cv2.WINDOW_NORMAL)
+cv2.resizeWindow("Starting image", 800, 600)  # Largura: 800, Altura: 600
+cv2.imshow("Starting image", imgCanny)
+cv2.waitKey()
 
 kernel = np.ones((2, 2))
 imgDil = cv2.dilate(imgCanny, kernel, iterations = 3)
@@ -99,10 +132,10 @@ imgThre = cv2.erode(imgDil, kernel, iterations = 3)
 imgFinalContours, finalContours = getContours(imgThre, img)
 
 # first final contour has the area of the coin in pixel
-coinPixelArea = finalContours[0][1]
+coinPixelArea = 5000#finalContours[0][1]
 print("Coin Area in pixel", coinPixelArea)
 # second final contour has the area of the meat slice in pixel
-slicePixelArea = finalContours[1][1]
+slicePixelArea = finalContours[0][1]#finalContours[1][1]
 print("Entire Slice Area in pixel", slicePixelArea)
 
 # let's go cm^2
@@ -110,6 +143,9 @@ print("Coin Area in cm^2:", coinArea)
 print("Entire Slice Area in cm^2:", pixelToArea(slicePixelArea, coinPixelArea))
 
 # show  the contours on the unfiltered starting image
+cv2.namedWindow("Final External Contours", cv2.WINDOW_NORMAL)
+cv2.resizeWindow("Final External Contours", 800, 600)  # Largura: 800, Altura: 600
+
 cv2.imshow("Final External Contours", imgFinalContours)
 cv2.waitKey()
 
@@ -127,6 +163,9 @@ mask = cv2.inRange(hsv, lowerVal, upperVal)
 final = cv2.bitwise_and(img, img, mask= mask)
 
 # show selection
+cv2.namedWindow("Lean Cut", cv2.WINDOW_NORMAL)
+cv2.resizeWindow("Lean Cut", 800, 600)  # Largura: 800, Altura: 600
+
 cv2.imshow("Lean Cut", final)
 cv2.waitKey()
 
