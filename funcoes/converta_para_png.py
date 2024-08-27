@@ -3,24 +3,26 @@ from PIL import Image
 
 def convert_tiff_to_png(input_file):
     try:
-        output_file = os.path.splitext(input_file)[0] + ".png"
+        # Cria a pasta de saída para armazenar as imagens PNG
+        output_folder = os.path.join(os.path.dirname(input_file), "imagens png")
+        os.makedirs(output_folder, exist_ok=True)
+        
+        # Define o caminho e o nome do arquivo de saída em formato PNG
+        output_file = os.path.join(output_folder, os.path.splitext(os.path.basename(input_file))[0] + ".png")
+        
+        # Abre a imagem TIFF de entrada
         image = Image.open(input_file)
+        
+        # Salva a imagem no formato PNG no arquivo de saída
         image.save(output_file, "PNG")
+        
+        # Imprime uma mensagem de sucesso
         print("Conversão concluída com sucesso!")
     except Exception as e:
+        # Em caso de erro, imprime a mensagem de erro
         print(f"Ocorreu um erro durante a conversão: {str(e)}")
 
 # Exemplo de uso
-input_file = "F:/backup de arquivos/fotos/IC/imagens-20240604T172236Z-001/Nova pasta/teste2.tif"
+input_file = 'imagens de exemplo/teste.tif'
 convert_tiff_to_png(input_file)
 
-# Print dos metadados antes da conversão
-image_before = Image.open(input_file)
-print("Metadados antes da conversão:")
-print(image_before.info)
-
-# Print dos metadados depois da conversão
-output_file = os.path.splitext(input_file)[0] + ".png"
-image_after = Image.open(output_file)
-print("Metadados depois da conversão:")
-print(image_after.info)
