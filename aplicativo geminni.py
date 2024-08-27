@@ -7,6 +7,8 @@ import numpy as np
 from PIL import Image
 from io import BytesIO
 import base64
+import funcoes.converta_para_png as t_p
+import funcoes.corte_da_imagem as corte
 
 # Function to convert NumPy array to base64 PNG image
 def numpy_to_base64(np_array):
