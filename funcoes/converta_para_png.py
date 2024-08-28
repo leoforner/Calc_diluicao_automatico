@@ -1,5 +1,5 @@
-import os
-from PIL import Image
+from funcoes.todas_bibliotecas_e_funcoes import *
+
 
 def convert_tiff_to_png(input_file):
     try:

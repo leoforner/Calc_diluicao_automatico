@@ -1,5 +1,5 @@
-import cv2
-import os
+from funcoes.todas_bibliotecas_e_funcoes import *
+
 def crop(input_path, up, bottom, left, right):
     # ler a imagem
     image = cv2.imread(input_path)

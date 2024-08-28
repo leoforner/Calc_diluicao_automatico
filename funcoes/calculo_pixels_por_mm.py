@@ -1,8 +1,5 @@
-import cv2
-import numpy as np
-from corte_da_imagem import crop
+from funcoes.todas_bibliotecas_e_funcoes import *
 
-import matplotlib.pyplot as plt 
 
 def calculate_pixels_per_mm(real_length_mm, image_path, crop_percentage):
 
