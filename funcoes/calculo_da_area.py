@@ -2,7 +2,7 @@ from todas_bibliotecas_e_funcoes import *
 
 
 def calculate_area(path, comprimento_real_mm):
-    # Função para converter a área do objeto de pixels para mm^2
+    # função para calcular a qunatidade de pixels por mm
     pixes_per_mm = calculate_pixels_per_mm(comprimento_real_mm, path, 0.75)
     
     def grafico(img):
@@ -12,6 +12,7 @@ def calculate_area(path, comprimento_real_mm):
         cv2.imshow("Starting image", img)
         cv2.waitKey()
 
+    path = crop(path, 0, 0.1, 0.1, 0.1)
 
     # sourcing the input image
     img = cv2.imread(path)
@@ -58,10 +59,7 @@ def calculate_area(path, comprimento_real_mm):
     print("Área do objeto em mm^2:", objectArea)
 
     # Mostrando a imagem com os contornos
-    cv2.namedWindow("Contornos", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("Contornos", 800, 600)
-    cv2.imshow("Contornos", imgContour)
-    cv2.waitKey()
+    grafico(imgContour)
 
     cv2.destroyAllWindows()
 
