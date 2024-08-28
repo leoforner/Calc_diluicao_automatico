@@ -1,6 +1,5 @@
 # Função: Importar todas as bibliotecas e funções necessárias para o projeto
 # bibliotecas padrão
-from email.mime import image
 import flet as ft
 from flet import Container, Row, Column, FilePicker, FilePickerResultEvent, icons
 from pathlib import Path
@@ -12,6 +11,7 @@ import base64
 from sympy import im
 import matplotlib.pyplot as plt
 import os
+import rembg
 
 # bibliotecas personalizadas
 from corte_da_imagem import crop
