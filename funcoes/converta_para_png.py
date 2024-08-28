@@ -4,7 +4,7 @@ from todas_bibliotecas_e_funcoes import *
 def convert_tiff_to_png(input_file):
     try:
         # Cria a pasta de saída para armazenar as imagens PNG
-        output_folder = os.path.join(os.path.dirname(input_file), "imagens png")
+        output_folder = os.path.join(os.path.dirname(input_file), "png")
         os.makedirs(output_folder, exist_ok=True)
         
         # Define o caminho e o nome do arquivo de saída em formato PNG

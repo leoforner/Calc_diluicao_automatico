@@ -14,9 +14,9 @@ def crop(input_path, up, bottom, left, right):
     # cortar a imagem
     cropped_image = image[int(top_slice):int(bottom_slice), int(left_slice):int(right_slice)]
 
-    # criar o diretório "imagens cortadas" a partir do diretório da imagem original
+    # criar o diretório "cortadas" a partir do diretório da imagem original
     original_directory = os.path.dirname(input_path)
-    cropped_directory = os.path.join(original_directory, "imagens cortadas")
+    cropped_directory = os.path.join(original_directory, "cortadas")
     os.makedirs(cropped_directory, exist_ok=True)
 
     # salvar a imagem cortada no diretório
