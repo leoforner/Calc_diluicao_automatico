@@ -1,14 +1,4 @@
-from email.mime import image
-import flet as ft
-from flet import Container, Row, Column, FilePicker, FilePickerResultEvent, icons
-from pathlib import Path
-import cv2 
-import numpy as np
-from PIL import Image
-from io import BytesIO
-import base64
-import funcoes.converta_para_png as t_p
-import funcoes.corte_da_imagem as corte
+from funcoes.todas_bibliotecas_e_funcoes import *
 
 # Function to convert NumPy array to base64 PNG image
 def numpy_to_base64(np_array):
