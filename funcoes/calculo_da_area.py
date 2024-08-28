@@ -1,4 +1,4 @@
-from funcoes.todas_bibliotecas_e_funcoes import *
+from todas_bibliotecas_e_funcoes import *
 
 
 def calculate_area(path, comprimento_real_mm):
@@ -52,10 +52,8 @@ def calculate_area(path, comprimento_real_mm):
     # Calculando a área do objeto em pixels
     objectPixelArea = cv2.contourArea(finalContours[0])
 
-
-
     # Calculando a área do objeto em mm^2
-    objectArea = pixelToArea(objectPixelArea, pixes_per_mm)
+    objectArea = objectPixelArea/ pixes_per_mm
 
     print("Área do objeto em mm^2:", objectArea)
 
