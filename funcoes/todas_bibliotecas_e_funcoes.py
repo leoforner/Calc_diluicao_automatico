@@ -11,7 +11,7 @@ import base64
 from sympy import im
 import matplotlib.pyplot as plt
 import os
-import rembg
+from rembg import remove
 
 # bibliotecas personalizadas
 from corte_da_imagem import crop
