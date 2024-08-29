@@ -1,6 +1,7 @@
-from funcoes.todas_bibliotecas_e_funcoes import *
+from funcoes.funcoes import *
+from funcoes.bibliotecas import *
 
-# Function to convert NumPy array to base64 PNG image
+# Função para converter um array NumPy em uma imagem base64 PNG
 def numpy_to_base64(np_array):
     image = Image.fromarray(np_array.astype('uint8'))
     buffered = BytesIO()
@@ -9,81 +10,79 @@ def numpy_to_base64(np_array):
     return img_str
 
 def main(page: ft.Page):
-    page.title = "Image Analysis"
+    # Definir variáveis para a página
+    page.title = "Cálculo de Diluição"
     page.scroll = True
-    is_web = False  # Variável booleana para desabilitar os botões
+    is_web = False  # Variável booleana para desabilitar botões
 
-    # Data Storage
-    directory_path = ft.Text(data=[])
-    imagem_original = Container(
-        image_src='C:/Users/leona/OneDrive - UFSC/Imagens/robota/Caputinho.png',
+    # Armazenamento de dados
+    directory_path = ft.Text(data=[])  # Caminho do diretório selecionado pelo usuário
+    original_image = Container(
+        image_src='C:/Users/leona/OneDrive - UFSC/Images/robota/Caputinho.png',
         width=150, height=150, image_fit=ft.ImageFit.FILL, data=0
     )
-    imagens_pb = Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY, data=[0, 0, 0, 0, 0])
-    imagens_blur = Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY, data=[0, 0, 0, 0, 0])
-    imagens_vales = Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY, data=[0, 0, 0, 0, 0])
-    imagens_hz = Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY, data=[0, 0, 0, 0, 0])
-    imagem_final = Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY, data=[0, 0, 0, 0, 0])
+    bw_images = Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY, data=[0, 0, 0, 0, 0])  # Imagens em escala de cinza
+    blur_images = Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY, data=[0, 0, 0, 0, 0])  # Imagens com desfoque
+    edges_images = Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY, data=[0, 0, 0, 0, 0])  # Imagens com detecção de bordas
+    horizontal_images = Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY, data=[0, 0, 0, 0, 0])  # Imagens com linhas horizontais
+    final_image = Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY, data=[0, 0, 0, 0, 0])  # Imagem final processada
 
-    # Event Handlers
+    # Manipuladores de eventos
+
+    # Manipulador de evento para obter o diretório selecionado pelo usuário
     def get_directory_result(e: FilePickerResultEvent):
-        directory_path.value = e.path if e.path else "Cancelled!"
+        directory_path.value = e.path if e.path else "Cancelado!"
         directory_path.data.clear()
-        for arquivo in Path(directory_path.value).iterdir():
-            if arquivo.is_file() and arquivo.suffix.lower() in (".jpg", ".jpeg", ".png", ".gif", '.tif'):
-                new_path = str(arquivo).replace("\\", "/")
+        for file in Path(directory_path.value).iterdir():
+            if file.is_file() and file.suffix.lower() in (".jpg", ".jpeg", ".png", ".gif", '.tif'):
+                new_path = str(file).replace("\\", "/")
                 directory_path.data.append(new_path)
 
-        proxima(e)
-        anterior(e)
+        next_image(e)
+        previous_image(e)
         directory_path.update()
-        processar_blur()
+        process_blur()
 
-
-    def proxima(e):
-        if imagem_original.data == len(directory_path.data) - 1:
-            imagem_original.data = 0
+    # Manipulador de evento para exibir a próxima imagem
+    def next_image(e):
+        if original_image.data == len(directory_path.data) - 1:
+            original_image.data = 0
         else:
-            imagem_original.data += 1
-        #print("pro")
-        #print(directory_path.data)
-        print(imagem_original.data)
-        #print(directory_path.data[imagem_original.data])
+            original_image.data += 1
 
-        imagem_original.image_src = directory_path.data[imagem_original.data]
-        imagem_original.update()
-        atual.update()
-        processar_blur()
+        original_image.image_src = directory_path.data[original_image.data]
+        original_image.update()
+        current.update()
+        process_blur()
         page.update()
 
-    def anterior(e):
-        if imagem_original.data == 0:
-            imagem_original.data = len(directory_path.data) - 1
+    # Manipulador de evento para exibir a imagem anterior
+    def previous_image(e):
+        if original_image.data == 0:
+            original_image.data = len(directory_path.data) - 1
         else:
-            imagem_original.data -= 1
-        #print("ant")
-        #print(directory_path.data)
-        print(imagem_original.data)
-        #print(directory_path.data[imagem_original.data])
-        imagem_original.image_src = directory_path.data[imagem_original.data]
-        imagem_original.update()
-        atual.update()
-        processar_blur()
+            original_image.data -= 1
+
+        original_image.image_src = directory_path.data[original_image.data]
+        original_image.update()
+        current.update()
+        process_blur()
         page.update()
 
-    def processar_blur():
-        imagens_blur.controls.clear()
-        image = Image.open(imagem_original.image_src).convert('RGB')
+    # Função para processar as imagens com desfoque
+    def process_blur():
+        blur_images.controls.clear()
+        image = Image.open(original_image.image_src).convert('RGB')
         image = np.array(image)
-        pb_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        itens = []
+        bw_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        items = []
 
         for i in range(5):
-            BLUR = cv2.GaussianBlur(pb_image, (1 + i*20, 1 + i*20), 0)
-            imagens_blur.data[i] = BLUR
+            BLUR = cv2.GaussianBlur(bw_image, (1 + i*20, 1 + i*20), 0)
+            blur_images.data[i] = BLUR
             base64_image = numpy_to_base64(BLUR)
 
-            itens.append(
+            items.append(
                 ft.Column([
                     ft.Image(
                         src_base64=base64_image,
@@ -92,32 +91,29 @@ def main(page: ft.Page):
                     ),
                     ft.ElevatedButton(
                         text=f"Botão {i}",
-                        on_click=lambda e, data=i: processar_PB(imagens_blur.data[data]), #print(f"Botão {data} clicado"),
+                        on_click=lambda e, data=i: process_bw(blur_images.data[data]),
                         disabled=is_web,
                     ),
                 ])
             )
 
-
-        print('blur ok')
-        imagens_blur.controls = itens
-        imagens_blur.update()
+        blur_images.controls = items
+        blur_images.update()
         blur.update()
         page.update()
-        processar_PB(imagens_blur.data[0])
-        return blur
+        process_bw(blur_images.data[0])
 
-    def processar_PB(ima):
-        #print(ima)
-        imagens_pb.controls.clear()
-        itens = []
+    # Função para processar as imagens em escala de cinza
+    def process_bw(ima):
+        bw_images.controls.clear()
+        items = []
 
         for i in range(5):
             ret,thresh = cv2.threshold(ima,(1 + (15*i)),255,0)
-            imagens_pb.data[i] = thresh
+            bw_images.data[i] = thresh
             base64_image = numpy_to_base64(thresh)
 
-            itens.append(
+            items.append(
                 ft.Column([
                     ft.Image(
                         src_base64=base64_image,
@@ -126,35 +122,29 @@ def main(page: ft.Page):
                     ),
                     ft.ElevatedButton(
                         f"Imagem {i}",
-                        on_click=lambda e, data=i: processar_vales(imagens_pb.data[data]), #print(f"Botão {data} clicado"),
+                        on_click=lambda e, data=i: process_edges(bw_images.data[data]),
                         disabled=is_web,
                     ),
                 ])
             )
 
-        print('pb ok')
-        
-        imagens_pb.controls = itens
-        imagens_pb.update()
-        P_B.update()
+        bw_images.controls = items
+        bw_images.update()
+        bw.update()
         page.update()
-        processar_vales(imagens_pb.data[0])
-        return
-   
-    def processar_vales(imagem):
-        imagens_vales.controls.clear()
-        itens = []
+        process_edges(bw_images.data[0])
+
+    # Função para processar as imagens com detecção de bordas
+    def process_edges(image):
+        edges_images.controls.clear()
+        items = []
 
         for i in range(5):
-            
-            # Aplicar a detecção de bordas na imagem
-            bordas = cv2.Canny(imagem, i*10+30, i*10+130)
+            edges = cv2.Canny(image, i*10+30, i*10+130)
+            edges_images.data[i] = edges
+            base64_image = numpy_to_base64(edges)
 
- 
-            imagens_vales.data[i] = bordas
-            base64_image = numpy_to_base64(bordas)
-
-            itens.append(
+            items.append(
                 ft.Column([
                     ft.Image(
                         src_base64=base64_image,
@@ -163,57 +153,42 @@ def main(page: ft.Page):
                     ),
                     ft.ElevatedButton(
                         f"Imagem {i}",
-                        on_click=lambda e, data=i: processar_horizontal(imagens_vales.data[data]), #print(f"Botão {data} clicado"),
+                        on_click=lambda e, data=i: process_horizontal(edges_images.data[data]),
                         disabled=is_web,
                     ),
                 ])
             )
 
-
-        print('vales ok')
-        
-        imagens_vales.controls = itens
-        imagens_vales.update()
+        edges_images.controls = items
+        edges_images.update()
         horizontal.update()
         page.update()
-        processar_horizontal(imagens_vales.data[0])
-        
-        return 
+        process_horizontal(edges_images.data[0])
 
-    def processar_horizontal(bordas):
-        if imagem_original.image_src != None:
-            imagem = cv2.imread(imagem_original.image_src)
+    # Função para processar as imagens com linhas horizontais
+    def process_horizontal(edges):
+        if original_image.image_src != None:
+            image = cv2.imread(original_image.image_src)
         else:
-            imagem = cv2.imread("C:/Users/leona/OneDrive - UFSC/Imagens/robota/Caputinho.png")
-        imagens = []
-        imagens_hz.controls.clear()
-        itens = []
+            image = cv2.imread("C:/Users/leona/OneDrive - UFSC/Images/robota/Caputinho.png")
+        images = []
+        horizontal_images.controls.clear()
+        items = []
 
-        # Detectar as linhas na imagem
-        linhas = cv2.HoughLinesP(bordas, 1, np.pi/180, threshold=80, minLineLength=500, maxLineGap=1000)
+        lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=80, minLineLength=500, maxLineGap=1000)
+        sorted_lines = sorted(lines, key=lambda line: line[0][2] - line[0][0], reverse=True)
+        top_lines = sorted_lines[:5]
 
-        # Ordenar as linhas pela sua comprimento
-        linhas_ordenadas = sorted(linhas, key=lambda linha: linha[0][2] - linha[0][0], reverse=True)
+        for i in range(len(top_lines)):
+            images.append(image.copy())
 
-        # Retornar as 'num_linhas' maiores linhas
-        L_O = linhas_ordenadas[:5]
-        print(len(linhas))
-        print(len(L_O))
-        
-        for i in range(len(L_O)):
-            
-            
+            x1, y1, x2, y2 = top_lines[i][0]
+            cv2.line(images[i], (x1, y1), (x2, y2), (255, 0, 0), 25)
 
-           
-            imagens.append(imagem.copy())
+            horizontal_images.data[i] = images[i]
+            base64_image = numpy_to_base64(images[i])
 
-            x1, y1, x2, y2 = L_O[i][0]
-            cv2.line(imagens[i], (x1, y1), (x2, y2), (255, 0, 0), 25)
-
-            imagens_hz.data[i] = imagens[i]
-            base64_image = numpy_to_base64(imagens[i])
-
-            itens.append(
+            items.append(
                 ft.Column([
                     ft.Image(
                         src_base64=base64_image,
@@ -222,30 +197,27 @@ def main(page: ft.Page):
                     ),
                     ft.ElevatedButton(
                         f"Imagem {i}",
-                        on_click=lambda e, data=i: processar_imagem_final(imagens_hz.data[data]), #print(f"Botão {data} clicado"),
+                        on_click=lambda e, data=i: process_final_image(horizontal_images.data[data]),
                         disabled=is_web,
                     ),
                 ])
             )
 
-        print('hz ok')
-
-        imagens_hz.controls = itens
-        imagens_hz.update()
+        horizontal_images.controls = items
+        horizontal_images.update()
         horizontal.update()
         final.update()
         page.update()
-        processar_imagem_final(imagens_hz.data[0])
-        return #lines
-    
-    def processar_imagem_final(ima):
-        imagem_final.controls.clear()
-        itens = []
+        process_final_image(horizontal_images.data[0])
 
-        
+    # Função para exibir a imagem final processada
+    def process_final_image(ima):
+        final_image.controls.clear()
+        items = []
+
         base64_image = numpy_to_base64(ima)
 
-        itens.append(
+        items.append(
             ft.Column([
                 ft.Image(
                     src_base64=base64_image,
@@ -255,21 +227,17 @@ def main(page: ft.Page):
             ])
         )
 
-        print('final ok')
-        
-        imagem_final.controls = itens
-        imagem_final.update()
+        final_image.controls = items
+        final_image.update()
         final.update()
         page.update()
-        return
 
-
-    # ... (UI elements and page setup, similar to the previous response)
-    # UI Elements
+    # ... (Elementos de UI e configuração da página, semelhante à resposta anterior)
+    # Elementos de UI
     get_directory_dialog = FilePicker(on_result=get_directory_result)
 
-    Seleção_pasta = Row([
-        ft.Text(value="Escolha a pasta que deseja fazer a análize:"),
+    Folder_Selection = Row([
+        ft.Text(value="Escolha a pasta que deseja analisar:"),
         ft.ElevatedButton(
             "Selecionar Pasta",
             icon=icons.FOLDER_OPEN,
@@ -282,65 +250,65 @@ def main(page: ft.Page):
     alignment=ft.MainAxisAlignment.SPACE_EVENLY,
     )
 
-    atual = Column(
+    current = Column(
         [
-        Row([
-            ft.Text(value="Imagem Atual:"),
+            Row([
+                ft.Text(value="Imagem Atual:"),
+                ],
+                spacing=30,
+                alignment=ft.MainAxisAlignment.SPACE_EVENLY,
+            ),
+            Row(
+                [
+                ft.ElevatedButton(
+                    "Imagem Anterior",
+                    icon=icons.KEYBOARD_DOUBLE_ARROW_LEFT_ROUNDED,
+                    on_click=previous_image,
+                    disabled=is_web,
+                ),
+                original_image,
+                ft.ElevatedButton(
+                    "Próxima Imagem",
+                    icon=icons.KEYBOARD_DOUBLE_ARROW_RIGHT_ROUNDED,
+                    on_click=next_image,
+                    disabled=is_web,
+                ),
+                ],
+            ),
         ],
         spacing=30,
         alignment=ft.MainAxisAlignment.SPACE_EVENLY,
-        ),
-        Row(
-        [
-            ft.ElevatedButton(
-                "Imagem aterior",
-                icon=icons.KEYBOARD_DOUBLE_ARROW_LEFT_ROUNDED,
-                on_click=anterior,
-                disabled=is_web,
-            ),
-            imagem_original,
-            ft.ElevatedButton(
-                "proxima imagem",
-                icon=icons.KEYBOARD_DOUBLE_ARROW_RIGHT_ROUNDED,
-                on_click=proxima,
-                disabled=is_web,
-            ),
-
-        ],
-        spacing=30,
-        alignment=ft.MainAxisAlignment.SPACE_EVENLY,
-        )
-    ])
+    )
 
     blur = Column([
-        ft.Text(value="Escolha a imagem com o melhro blur:"),
-        imagens_blur,
+        ft.Text(value="Escolha a imagem com o melhor desfoque:"),
+        blur_images,
     ],
     spacing=30,
     alignment=ft.MainAxisAlignment.SPACE_EVENLY,
     )
 
-    P_B = Column([
+    bw = Column([
         ft.Text(value="Escolha a imagem com o melhor contraste:"),
-        imagens_pb,
+        bw_images,
     ],
     spacing=30,
     alignment=ft.MainAxisAlignment.SPACE_EVENLY,
     )
 
     horizontal = Column([
-        ft.Text(value="Escolha a imagem com a melhor linha borda:"),
-        imagens_vales,
+        ft.Text(value="Escolha a imagem com a melhor detecção de borda:"),
+        edges_images,
         ft.Text(value="Escolha a imagem com a melhor linha horizontal:"),
-        imagens_hz,
+        horizontal_images,
     ],
     spacing=30,
     alignment=ft.MainAxisAlignment.SPACE_EVENLY,
     )
 
     final = Row([
-        ft.Text(value="Essa é a imagem processada e esses são os valores encontrados:"),
-        imagem_final,
+        ft.Text(value="Esta é a imagem processada e estes são os valores encontrados:"),
+        final_image,
 
     ],
     spacing=30,
@@ -348,13 +316,13 @@ def main(page: ft.Page):
     )
 
 
-    # Page Setup
+    # Configuração da página
     page.overlay.extend([get_directory_dialog])
     page.add(
-        Seleção_pasta,
-        atual,
+        Folder_Selection,
+        current,
         blur,
-        P_B,
+        bw,
         horizontal,
         final,
     )

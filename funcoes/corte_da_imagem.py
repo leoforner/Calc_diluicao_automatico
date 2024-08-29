@@ -1,4 +1,5 @@
-from todas_bibliotecas_e_funcoes import *
+from funcoes.funcoes import *
+from funcoes.bibliotecas import *
 
 def crop(input_path, up, bottom, left, right):
     # ler a imagem

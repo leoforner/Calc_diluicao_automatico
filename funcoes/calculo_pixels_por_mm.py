@@ -1,5 +1,5 @@
-from todas_bibliotecas_e_funcoes import *
-
+from funcoes.funcoes import *
+from funcoes.bibliotecas import *
 
 def calculate_pixels_per_mm(real_length_mm, image_path, crop_percentage):
 

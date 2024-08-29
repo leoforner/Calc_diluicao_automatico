@@ -1,4 +1,5 @@
-from todas_bibliotecas_e_funcoes import *
+from funcoes.funcoes import *
+from funcoes.bibliotecas import *
 
 
 def calculate_area(path, comprimento_real_mm):

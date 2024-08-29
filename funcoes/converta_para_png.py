@@ -1,5 +1,5 @@
-from todas_bibliotecas_e_funcoes import *
-
+from funcoes.funcoes import *
+from funcoes.bibliotecas import *
 
 def convert_tiff_to_png(input_file):
     try:
