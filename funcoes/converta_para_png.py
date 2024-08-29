@@ -22,7 +22,8 @@ def convert_tiff_to_png(input_file):
         # Em caso de erro, imprime a mensagem de erro
         print(f"Ocorreu um erro durante a conversão: {str(e)}")
 
+'''
 # Exemplo de uso
 input_file = 'imagens de exemplo/teste.tif'
 convert_tiff_to_png(input_file)
-
+'''

@@ -21,4 +21,4 @@ def remover_fundo(input_path):
     
 
 # Exemplo de uso da função
-remover_fundo("imagens de exemplo/teste.tif")
+remover_fundo("imagens_exemplo/teste.tif")

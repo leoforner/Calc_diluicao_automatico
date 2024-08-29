@@ -63,5 +63,7 @@ def calculate_area(path, comprimento_real_mm):
 
     cv2.destroyAllWindows()
 
+'''
 # Example usage
 calculate_area('imagens de exemplo/teste1.tif', 1)
+'''

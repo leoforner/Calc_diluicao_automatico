@@ -26,7 +26,8 @@ def crop(input_path, up, bottom, left, right):
 
     return cropped_image_path
 
+'''
 # Exemplo de uso
-input_path = 'imagens de exemplo/teste.tif'
+input_path = 'imagens_exemplo/teste.tif'
 output = crop(input_path, 0.2, 0.2, 0.2, 0.2)
-print('oi')
+'''

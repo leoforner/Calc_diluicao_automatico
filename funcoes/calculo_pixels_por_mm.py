@@ -47,6 +47,7 @@ def calculate_pixels_per_mm(real_length_mm, image_path, crop_percentage):
 
     return pixels_per_mm
 
+'''
 # Exemplo de uso
 real_length_mm = 1
 image_path = 'imagens de exemplo/teste1.tif'
@@ -54,3 +55,4 @@ crop_percentage = 0.75
 
 pixels_per_mm = calculate_pixels_per_mm(real_length_mm, image_path, crop_percentage)
 print("Pixels por mm:", pixels_per_mm)
+'''
