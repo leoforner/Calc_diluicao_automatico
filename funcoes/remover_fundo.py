@@ -1,6 +1,6 @@
 from todas_bibliotecas_e_funcoes import *
 
-def remover_fundo(input_path):
+def remove_background(input_path):
 
     # remover background da imagem
     input = cv2.imread(input_path)
@@ -19,6 +19,7 @@ def remover_fundo(input_path):
     return rembg_image_path
 
     
-
+'''
 # Exemplo de uso da função
-remover_fundo("imagens_exemplo/teste.tif")
+remove_background("imagens_exemplo/teste.tif")
+'''
