@@ -29,3 +29,4 @@ def crop(input_path, up, bottom, left, right):
 # Exemplo de uso
 input_path = 'imagens de exemplo/teste.tif'
 output = crop(input_path, 0.2, 0.2, 0.2, 0.2)
+print('oi')
