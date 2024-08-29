@@ -17,4 +17,5 @@ from rembg import remove
 from corte_da_imagem import crop
 from converta_para_png import convert_tiff_to_png
 from calculo_pixels_por_mm import calculate_pixels_per_mm
+from remover_fundo import remove_background
 #from calculo_da_area import calculate_area
