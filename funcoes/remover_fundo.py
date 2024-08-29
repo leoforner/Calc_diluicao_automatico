@@ -14,7 +14,7 @@ def remove_background(input_path):
     # salvar a imagem sem fundo no diretório
     image_name = os.path.basename(input_path)
     rembg_image_path = os.path.join(rembg_directory, image_name)
-    cv2.imwrite(rembg_image_path, output)
+    cv2.imwrite(rembg_image_path, output) # type: ignore
 
     return rembg_image_path
 
