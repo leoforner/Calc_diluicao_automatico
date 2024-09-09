@@ -11,6 +11,7 @@ flet = "*"
 rembg = "*"
 pillow = "*"
 opencv-python = "*"
+pyautogui = "*"
 
 [dev-packages]
 

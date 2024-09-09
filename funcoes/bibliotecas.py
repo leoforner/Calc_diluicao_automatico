@@ -12,3 +12,4 @@ from sympy import im
 import matplotlib.pyplot as plt
 import os
 from rembg import remove
+import pyautogui
