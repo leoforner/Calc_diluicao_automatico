@@ -1,3 +1,4 @@
+from email.mime import image
 from funcoes.funcoes import *
 from funcoes.bibliotecas import *
 
@@ -7,25 +8,59 @@ def numpy_to_base64(np_array):
     buffered = BytesIO()
     image.save(buffered, format="PNG")
     img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-    return img_str
+    return 
+
+# Função para redimensionar uma imagem mantendo a proporção
+    
+def proportional_scale(image, scale_factor):
+    height, width = image.shape[:2]
+    proportion = width / height
+    screen_width, screen_height = pyautogui.size()
+    new_height = int(screen_height * scale_factor)
+    new_width = int(new_height * proportion)
+    
+    return new_width, new_height
+
 
 def main(page: ft.Page):
+    '''# funções das principais variaveis 
+    
+    
+    '''
+    
+    
     # Definir variáveis para a página
     page.title = "Cálculo de Diluição"
     page.scroll = True
     is_web = False  # Variável booleana para desabilitar botões
 
+    # Variável para controlar a visibilidade
+    is_visible = ft.Ref[bool]()
+    is_visible.value = False
+
+    # Variáveis para controlar a largura e altura das imagens
+    big_width=300
+    big_height=300
+    small_width=150
+    small_height=150    
+
+
     # Armazenamento de dados
     directory_path = ft.Text(data=[])  # Caminho do diretório selecionado pelo usuário
     original_image = Container(
-        image_src='C:/Users/leona/OneDrive - UFSC/Images/robota/Caputinho.png',
-        width=150, height=150, image_fit=ft.ImageFit.FILL, data=0
+        image_src='imagens_exemplo/teste.tif',
+        width=big_width,
+        height=big_height, 
+        image_fit=ft.ImageFit.FILL, 
+        data=0,
     )
     bw_images = Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY, data=[0, 0, 0, 0, 0])  # Imagens em escala de cinza
     blur_images = Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY, data=[0, 0, 0, 0, 0])  # Imagens com desfoque
     edges_images = Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY, data=[0, 0, 0, 0, 0])  # Imagens com detecção de bordas
     horizontal_images = Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY, data=[0, 0, 0, 0, 0])  # Imagens com linhas horizontais
     final_image = Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY, data=[0, 0, 0, 0, 0])  # Imagem final processada
+
+    
 
     # Manipuladores de eventos
 
@@ -34,14 +69,34 @@ def main(page: ft.Page):
         directory_path.value = e.path if e.path else "Cancelado!"
         directory_path.data.clear()
         for file in Path(directory_path.value).iterdir():
-            if file.is_file() and file.suffix.lower() in (".jpg", ".jpeg", ".png", ".gif", '.tif'):
+            if file.is_file() and file.suffix.lower() in (".jpg", ".jpeg", ".png", '.tif'):
+                
+                # Exibir os elementos da página
+                is_visible.value = True
+                Folder_Selection.visible = is_visible.value
+                current.visible = is_visible.value
+                blur.visible = is_visible.value
+                bw.visible = is_visible.value
+                horizontal.visible = is_visible.value
+                final.visible = is_visible.value
+
+
+
                 new_path = str(file).replace("\\", "/")
                 directory_path.data.append(new_path)
 
-        next_image(e)
-        previous_image(e)
-        directory_path.update()
+        #dimensões da imagem
+        image = cv2.imread( directory_path.data[original_image.data])
+        big_width, big_height = proportional_scale(image, 0.5)
+        small_width, small_height = proportional_scale(image, 0.25)
+
+
+        original_image.data = 0
+        original_image.image_src = directory_path.data[original_image.data]
+        original_image.update()
+        current.update()
         process_blur()
+
 
     # Manipulador de evento para exibir a próxima imagem
     def next_image(e):
@@ -50,11 +105,17 @@ def main(page: ft.Page):
         else:
             original_image.data += 1
 
+
+        #dimensões da imagem
+        image = cv2.imread( directory_path.data[original_image.data])
+        big_width, big_height = proportional_scale(image, 0.5)
+        small_width, small_height = proportional_scale(image, 0.25)
+
+
         original_image.image_src = directory_path.data[original_image.data]
         original_image.update()
         current.update()
         process_blur()
-        page.update()
 
     # Manipulador de evento para exibir a imagem anterior
     def previous_image(e):
@@ -63,11 +124,18 @@ def main(page: ft.Page):
         else:
             original_image.data -= 1
 
+
+        #dimensões da imagem
+        image = cv2.imread( directory_path.data[original_image.data])
+        big_width, big_height = proportional_scale(image, 0.5)
+        small_width, small_height = proportional_scale(image, 0.25)
+
+
         original_image.image_src = directory_path.data[original_image.data]
         original_image.update()
         current.update()
         process_blur()
-        page.update()
+
 
     # Função para processar as imagens com desfoque
     def process_blur():
@@ -86,8 +154,8 @@ def main(page: ft.Page):
                 ft.Column([
                     ft.Image(
                         src_base64=base64_image,
-                        width=150,
-                        height=150,
+                        width=small_width,
+                        height=small_height,
                     ),
                     ft.ElevatedButton(
                         text=f"Botão {i}",
@@ -100,7 +168,6 @@ def main(page: ft.Page):
         blur_images.controls = items
         blur_images.update()
         blur.update()
-        page.update()
         process_bw(blur_images.data[0])
 
     # Função para processar as imagens em escala de cinza
@@ -117,8 +184,8 @@ def main(page: ft.Page):
                 ft.Column([
                     ft.Image(
                         src_base64=base64_image,
-                        width=150,
-                        height=150,
+                        width=small_width,
+                        height=small_height,
                     ),
                     ft.ElevatedButton(
                         f"Imagem {i}",
@@ -131,7 +198,6 @@ def main(page: ft.Page):
         bw_images.controls = items
         bw_images.update()
         bw.update()
-        page.update()
         process_edges(bw_images.data[0])
 
     # Função para processar as imagens com detecção de bordas
@@ -148,8 +214,8 @@ def main(page: ft.Page):
                 ft.Column([
                     ft.Image(
                         src_base64=base64_image,
-                        width=150,
-                        height=150,
+                        width=small_width,
+                        height=small_height,
                     ),
                     ft.ElevatedButton(
                         f"Imagem {i}",
@@ -162,7 +228,6 @@ def main(page: ft.Page):
         edges_images.controls = items
         edges_images.update()
         horizontal.update()
-        page.update()
         process_horizontal(edges_images.data[0])
 
     # Função para processar as imagens com linhas horizontais
@@ -192,8 +257,8 @@ def main(page: ft.Page):
                 ft.Column([
                     ft.Image(
                         src_base64=base64_image,
-                        width=150,
-                        height=150,
+                        width=small_width,
+                        height=small_height,
                     ),
                     ft.ElevatedButton(
                         f"Imagem {i}",
@@ -207,7 +272,6 @@ def main(page: ft.Page):
         horizontal_images.update()
         horizontal.update()
         final.update()
-        page.update()
         process_final_image(horizontal_images.data[0])
 
     # Função para exibir a imagem final processada
@@ -221,8 +285,8 @@ def main(page: ft.Page):
             ft.Column([
                 ft.Image(
                     src_base64=base64_image,
-                    width=150,
-                    height=150,
+                    width=big_width,
+                    height=big_height,
                 ),
             ])
         )
@@ -232,7 +296,6 @@ def main(page: ft.Page):
         final.update()
         page.update()
 
-    # ... (Elementos de UI e configuração da página, semelhante à resposta anterior)
     # Elementos de UI
     get_directory_dialog = FilePicker(on_result=get_directory_result)
 
@@ -250,7 +313,7 @@ def main(page: ft.Page):
     alignment=ft.MainAxisAlignment.SPACE_EVENLY,
     )
 
-    current = Column(
+    current = Row(
         [
             Row([
                 ft.Text(value="Imagem Atual:"),
@@ -314,6 +377,13 @@ def main(page: ft.Page):
     spacing=30,
     alignment=ft.MainAxisAlignment.SPACE_EVENLY,
     )
+
+    # Configuração da visibilidade dos elementos
+    current.visible = is_visible.value
+    blur.visible = is_visible.value
+    bw.visible = is_visible.value
+    horizontal.visible = is_visible.value
+    final.visible = is_visible.value
 
 
     # Configuração da página
