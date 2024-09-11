@@ -1,4 +1,3 @@
-from email.mime import image
 from funcoes.funcoes import *
 from funcoes.bibliotecas import *
 
@@ -8,7 +7,7 @@ def numpy_to_base64(np_array):
     buffered = BytesIO()
     image.save(buffered, format="PNG")
     img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-    return 
+    return img_str
 
 # Função para redimensionar uma imagem mantendo a proporção
     
@@ -39,6 +38,7 @@ def main(page: ft.Page):
     is_visible.value = False
 
     # Variáveis para controlar a largura e altura das imagens
+    global big_width, big_height, small_width, small_height
     big_width=300
     big_height=300
     small_width=150
@@ -49,8 +49,8 @@ def main(page: ft.Page):
     directory_path = ft.Text(data=[])  # Caminho do diretório selecionado pelo usuário
     original_image = Container(
         image_src='imagens_exemplo/teste.tif',
-        width=big_width,
-        height=big_height, 
+        width=  big_width,
+        height=  big_height, 
         image_fit=ft.ImageFit.FILL, 
         data=0,
     )
@@ -61,6 +61,16 @@ def main(page: ft.Page):
     final_image = Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY, data=[0, 0, 0, 0, 0])  # Imagem final processada
 
     
+    def update_dimensions(image):
+        global big_width, big_height, small_width, small_height
+        
+        big_width, big_height = proportional_scale(image, 0.5)
+        small_width, small_height = proportional_scale(image, 0.2)
+        
+        original_image.width = big_width
+        original_image.height = big_height  
+
+
 
     # Manipuladores de eventos
 
@@ -87,8 +97,8 @@ def main(page: ft.Page):
 
         #dimensões da imagem
         image = cv2.imread( directory_path.data[original_image.data])
-        big_width, big_height = proportional_scale(image, 0.5)
-        small_width, small_height = proportional_scale(image, 0.25)
+        update_dimensions(image)
+        
 
 
         original_image.data = 0
@@ -108,8 +118,7 @@ def main(page: ft.Page):
 
         #dimensões da imagem
         image = cv2.imread( directory_path.data[original_image.data])
-        big_width, big_height = proportional_scale(image, 0.5)
-        small_width, small_height = proportional_scale(image, 0.25)
+        update_dimensions(image)
 
 
         original_image.image_src = directory_path.data[original_image.data]
@@ -127,8 +136,7 @@ def main(page: ft.Page):
 
         #dimensões da imagem
         image = cv2.imread( directory_path.data[original_image.data])
-        big_width, big_height = proportional_scale(image, 0.5)
-        small_width, small_height = proportional_scale(image, 0.25)
+        update_dimensions(image)
 
 
         original_image.image_src = directory_path.data[original_image.data]
@@ -141,6 +149,7 @@ def main(page: ft.Page):
     def process_blur():
         blur_images.controls.clear()
         image = Image.open(original_image.image_src).convert('RGB')
+        
         image = np.array(image)
         bw_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         items = []
@@ -313,7 +322,7 @@ def main(page: ft.Page):
     alignment=ft.MainAxisAlignment.SPACE_EVENLY,
     )
 
-    current = Row(
+    current = Column(
         [
             Row([
                 ft.Text(value="Imagem Atual:"),
@@ -337,6 +346,8 @@ def main(page: ft.Page):
                     disabled=is_web,
                 ),
                 ],
+                spacing=30,
+                alignment=ft.MainAxisAlignment.SPACE_EVENLY,
             ),
         ],
         spacing=30,
