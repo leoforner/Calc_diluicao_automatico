@@ -96,7 +96,7 @@ def main(page: ft.Page):
                 directory_path.data.append(new_path)
 
         #dimensões da imagem
-        image = cv2.imread( directory_path.data[original_image.data])
+        image = cv2.imread( directory_path.data[0])
         update_dimensions(image)
         
 
@@ -148,7 +148,8 @@ def main(page: ft.Page):
     # Função para processar as imagens com desfoque
     def process_blur():
         blur_images.controls.clear()
-        image = Image.open(original_image.image_src).convert('RGB')
+        crop_image = crop(original_image.image_src, 0.01, 0.1, 0.01, 0.01)
+        image = Image.open(crop_image).convert('RGB')
         
         image = np.array(image)
         bw_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -250,32 +251,36 @@ def main(page: ft.Page):
         items = []
 
         lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=80, minLineLength=500, maxLineGap=1000)
-        sorted_lines = sorted(lines, key=lambda line: line[0][2] - line[0][0], reverse=True)
-        top_lines = sorted_lines[:5]
+        if lines is None:
+            pass
+        else:
 
-        for i in range(len(top_lines)):
-            images.append(image.copy())
+            sorted_lines = sorted(lines, key=lambda line: line[0][2] - line[0][0], reverse=True)
+            top_lines = sorted_lines[:5]
 
-            x1, y1, x2, y2 = top_lines[i][0]
-            cv2.line(images[i], (x1, y1), (x2, y2), (255, 0, 0), 25)
+            for i in range(len(top_lines)):
+                images.append(image.copy())
 
-            horizontal_images.data[i] = images[i]
-            base64_image = numpy_to_base64(images[i])
+                x1, y1, x2, y2 = top_lines[i][0]
+                cv2.line(images[i], (x1, y1), (x2, y2), (255, 0, 0), 25)
 
-            items.append(
-                ft.Column([
-                    ft.Image(
-                        src_base64=base64_image,
-                        width=small_width,
-                        height=small_height,
-                    ),
-                    ft.ElevatedButton(
-                        f"Imagem {i}",
-                        on_click=lambda e, data=i: process_final_image(horizontal_images.data[data]),
-                        disabled=is_web,
-                    ),
-                ])
-            )
+                horizontal_images.data[i] = images[i]
+                base64_image = numpy_to_base64(images[i])
+
+                items.append(
+                    ft.Column([
+                        ft.Image(
+                            src_base64=base64_image,
+                            width=small_width,
+                            height=small_height,
+                        ),
+                        ft.ElevatedButton(
+                            f"Imagem {i}",
+                            on_click=lambda e, data=i: process_final_image(horizontal_images.data[data]),
+                            disabled=is_web,
+                        ),
+                    ])
+                )
 
         horizontal_images.controls = items
         horizontal_images.update()
@@ -287,6 +292,12 @@ def main(page: ft.Page):
     def process_final_image(ima):
         final_image.controls.clear()
         items = []
+
+        if ima == None:
+            ima = Image.open(original_image.image_src).convert('RGB')
+        
+            ima = np.array(image)
+            
 
         base64_image = numpy_to_base64(ima)
 
